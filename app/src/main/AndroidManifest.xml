@@ -13,9 +13,19 @@
         android:theme="@style/Theme.EDUNews"
         tools:targetApi="31">
         <activity
+        news-home
             android:name=".NewsHome"
             android:exported="false"
             android:label="@string/title_activity_news_home" />
+        fogot-password
+            android:name=".FogotPassword"
+        Get-Start
+            android:name=".GetStart"
+            android:name=".SplashScreen"
+        develop
+        develop
+            android:exported="false" />
+        develop
         <activity
             android:name=".MainActivity"
             android:exported="true">
