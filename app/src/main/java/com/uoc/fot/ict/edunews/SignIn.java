@@ -31,18 +31,15 @@ public class SignIn extends AppCompatActivity {
                 // Get the text from email and password fields
                 String email = emailInput.getText().toString().trim();
                 String password = passwordInput.getText().toString().trim();
-
                 // Check if the email and password fields are filled
                 if (email.isEmpty()) {
                     Toast.makeText(SignIn.this, "Please enter your email", Toast.LENGTH_SHORT).show();
                     return; // Exit the method if the email is empty
                 }
-
                 if (password.isEmpty()) {
                     Toast.makeText(SignIn.this, "Please enter your password", Toast.LENGTH_SHORT).show();
                     return; // Exit the method if the password is empty
                 }
-
                 // If both fields are filled, navigate to MainActivity
                 Intent intent = new Intent(SignIn.this, MainActivity.class);
                 startActivity(intent);
