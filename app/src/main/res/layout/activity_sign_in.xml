@@ -55,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="35dp" />
 
-        <!-- Email Field -->
+        <!-- Email Field - Updated with TextInputLayout -->
         <TextView
             android:id="@+id/EmailTXT"
             android:layout_width="wrap_content"
@@ -67,18 +67,27 @@
             android:textSize="12sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/EmailInput"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/emailInputLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:fontFamily="@font/montserrat"
             android:hint="Enter your email"
-            android:inputType="textEmailAddress"
-            android:textColor="@color/black"
-            android:textSize="14sp" />
+            app:boxStrokeColor="@color/black"
+            app:hintTextColor="@android:color/darker_gray">
 
-        <!-- Password Field -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/EmailInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password Field - Updated with TextInputLayout and password toggle -->
         <TextView
             android:id="@+id/PasswordTXT"
             android:layout_width="wrap_content"
@@ -91,16 +100,27 @@
             android:textSize="12sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/PasswordInput"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordInputLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:fontFamily="@font/montserrat"
+            app:passwordToggleEnabled="true"
             android:hint="Enter your password"
-            android:inputType="textPassword"
-            android:textColor="@color/black"
-            android:textSize="14sp" />
+            app:boxStrokeColor="@color/black"
+            app:hintTextColor="@android:color/darker_gray"
+            app:passwordToggleTint="@android:color/darker_gray">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/PasswordInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:inputType="textPassword"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Forgot Password Button -->
         <TextView

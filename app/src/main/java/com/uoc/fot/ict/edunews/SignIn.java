@@ -14,7 +14,7 @@ public class SignIn extends AppCompatActivity {
 
     private EditText emailInput, passwordInput;
     private Button loginButton;
-    private TextView forgotPasswordButton;
+    private TextView forgotPasswordButton, signUpTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +26,7 @@ public class SignIn extends AppCompatActivity {
         passwordInput = findViewById(R.id.PasswordInput);
         loginButton = findViewById(R.id.Loginbutton);
         forgotPasswordButton = findViewById(R.id.ForgotPasswordButton);
+        signUpTextView = findViewById(R.id.SignUpTXT);
 
         // Set onClickListener for the login button
         loginButton.setOnClickListener(new View.OnClickListener() {
@@ -47,11 +48,6 @@ public class SignIn extends AppCompatActivity {
                     return;
                 }
 
-                // Validate password strength
-                if (!isPasswordValid(password)) {
-                    return;
-                }
-
                 // If all validations pass, navigate to MainActivity
                 Intent intent = new Intent(SignIn.this, MainActivity.class);
                 startActivity(intent);
@@ -63,59 +59,23 @@ public class SignIn extends AppCompatActivity {
         forgotPasswordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navigate to FogotPassword activity
+                // Navigate to Fogot Password activity
                 Intent intent = new Intent(SignIn.this, FogotPassword.class);
                 startActivity(intent);
             }
         });
-    }
 
-    /**
-     * Validates the password against complexity requirements
-     * @param password The password to validate
-     * @return true if password meets all requirements, false otherwise
-     */
-    private boolean isPasswordValid(String password) {
-        // Check for minimum length
-        if (password.length() < 8) {
-            Toast.makeText(SignIn.this,
-                    "Password must be at least 8 characters long",
-                    Toast.LENGTH_LONG).show();
-            return false;
-        }
 
-        // Check for at least one uppercase letter
-        if (!password.matches(".*[A-Z].*")) {
-            Toast.makeText(SignIn.this,
-                    "Password must contain at least one uppercase letter",
-                    Toast.LENGTH_LONG).show();
-            return false;
-        }
+        signUpTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Create an account !", Toast.LENGTH_LONG).show();
+                // Create an Intent to navigate to SignUpActivity
+                Intent intent = new Intent(SignIn.this, SignUp.class);
+                startActivity(intent); // Start the new activity
+            }
+        });
 
-        // Check for at least one lowercase letter
-        if (!password.matches(".*[a-z].*")) {
-            Toast.makeText(SignIn.this,
-                    "Password must contain at least one lowercase letter",
-                    Toast.LENGTH_LONG).show();
-            return false;
-        }
 
-        // Check for at least one digit
-        if (!password.matches(".*\\d.*")) {
-            Toast.makeText(SignIn.this,
-                    "Password must contain at least one digit",
-                    Toast.LENGTH_LONG).show();
-            return false;
-        }
-
-        // Check for at least one special character
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
-            Toast.makeText(SignIn.this,
-                    "Password must contain at least one special character",
-                    Toast.LENGTH_LONG).show();
-            return false;
-        }
-
-        return true;
     }
 }

@@ -28,14 +28,15 @@ public class FogotPassword extends AppCompatActivity {
         // Set click listener for submit button
         submitButton.setOnClickListener(v -> {
             Toast.makeText(this, "Password reset link sent to your email", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(FogotPassword.this, MainActivity.class);
+            startActivity(intent);
             // Here you would typically implement the password reset logic
         });
 
         // Set click listener for back to login text
         loginText.setOnClickListener(v -> {
-            Intent intent = new Intent(FogotPassword.this, MainActivity.class);
+            Intent intent = new Intent(FogotPassword.this, SignIn.class);
             startActivity(intent);
-            finish();
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
