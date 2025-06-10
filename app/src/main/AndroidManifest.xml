@@ -12,34 +12,27 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EDUNews"
         tools:targetApi="31">
+
+        <!-- MainActivity declared as the launcher activity -->
         <activity
-        user-info
-            android:name=".UserInfo"/>
-        sign-up
-            android:name=".SignUp"/>
-        dev-info
-            android:name=".DevInfo"
-            android:exported="false" />
-        news-home
-            android:name=".NewsHome"
-            android:exported="false"
-            android:label="@string/title_activity_news_home" />
-        fogot-password
-            android:name=".FogotPassword"/>
-        Get-Start
-            android:name=".GetStart"
-            android:name=".SplashScreen"/>
-        develop
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".UserInfo"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- MainActivity that is not exported (not a launcher activity) -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <!-- Preloaded fonts metadata -->
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
     </application>
 
 </manifest>
