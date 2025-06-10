@@ -25,12 +25,9 @@ public class GetStart extends AppCompatActivity {
 
         getStartButton.setOnClickListener(view -> {
             Toast.makeText(this, "Get Started", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(GetStart.this, MainActivity.class);
+            Intent intent = new Intent(GetStart.this, SignIn.class);
             startActivity(intent);
-            finish();
         });
-
-
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
