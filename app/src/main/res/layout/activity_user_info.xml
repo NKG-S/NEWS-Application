@@ -118,34 +118,35 @@
                 android:textColor="@color/black"
                 android:textSize="22sp" />
 
-            <!-- User Name Field -->
+
+            <!-- Email Field -->
             <TextView
-                android:id="@+id/UserNameTXT"
+                android:id="@+id/EmailTXT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:fontFamily="@font/montserrat_medium"
-                android:text="User Name"
+                android:text="Email"
                 android:textColor="@color/black"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/usernameInputLayout"
+                android:id="@+id/emailInputLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Nethmin"
+                android:hint="nethminkavindu@gmail.com"
                 app:boxStrokeColor="@color/black"
                 app:hintTextColor="@android:color/darker_gray">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/UsernameInput"
+                    android:id="@+id/EmailInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/montserrat"
-                    android:inputType="text"
+                    android:inputType="textEmailAddress"
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:enabled="false"
@@ -193,6 +194,44 @@
                     android:longClickable="false"
                     android:cursorVisible="false" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- User Name Field -->
+            <TextView
+                android:id="@+id/UserNameTXT"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/montserrat_medium"
+                android:text="User Name"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/usernameInputLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Nethmin"
+                app:boxStrokeColor="@color/black"
+                app:hintTextColor="@android:color/darker_gray">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/UsernameInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/montserrat"
+                    android:inputType="text"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:enabled="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:longClickable="false"
+                    android:cursorVisible="false" />
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <!-- Address Field -->
             <TextView
@@ -262,43 +301,6 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/montserrat"
                     android:inputType="phone"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:enabled="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:longClickable="false"
-                    android:cursorVisible="false" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Email Field -->
-            <TextView
-                android:id="@+id/EmailTXT"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/montserrat_medium"
-                android:text="Email"
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/emailInputLayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="nethminkavindu@gmail.com"
-                app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/EmailInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/montserrat"
-                    android:inputType="textEmailAddress"
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:enabled="false"
