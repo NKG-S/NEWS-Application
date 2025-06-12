@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class SignUp extends AppCompatActivity {
 
-    private static final String TAG = "SignUpActivity"; // Tag for logging
+    private static final String TAG = "SignUp"; // Tag for logging
 
     // Firebase instances
     private FirebaseAuth mAuth;
