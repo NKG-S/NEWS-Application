@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private TextView welcomeText, nameText, emailText, addressText, mobileText;
-    private Button logoutButton;
+    private Button logoutButton, UserInfoButton;
     private ProgressBar progressBar;
 
     @Override
@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         initializeFirebase();
         initializeViews();
         checkUserAuthentication();
+        UserInfoButton.setOnClickListener(v -> goToUserInfo());
     }
 
     private void initializeFirebase() {
@@ -48,8 +49,10 @@ public class MainActivity extends AppCompatActivity {
         mobileText = findViewById(R.id.mobileText);
         logoutButton = findViewById(R.id.logoutButton);
         progressBar = findViewById(R.id.progressBar);
+        UserInfoButton = findViewById(R.id.UserInfoButton);
 
         logoutButton.setOnClickListener(v -> performLogout());
+        UserInfoButton.setOnClickListener(v -> goToUserInfo());
     }
 
     private void checkUserAuthentication() {
@@ -125,5 +128,10 @@ public class MainActivity extends AppCompatActivity {
         addressText.setVisibility(show ? View.GONE : View.VISIBLE);
         mobileText.setVisibility(show ? View.GONE : View.VISIBLE);
         logoutButton.setEnabled(!show);
+    }
+
+    private void goToUserInfo(){
+        startActivity(new Intent(this, UserInfo.class));
+        finish();
     }
 }

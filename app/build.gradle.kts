@@ -26,17 +26,18 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         viewBinding = true
     }
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -46,17 +47,23 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.firebase.auth)
+
+    // Firebase Dependencies
+    implementation(platform("com.google.firebase:firebase-bom:33.15.0")) // Latest BOM version
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
+
+    // Additional Libraries
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.fragment:fragment-ktx:1.8.1")
+
+    // Testing Dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation(libs.material)
-
-    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
-    implementation ("com.google.firebase:firebase-auth")
-    implementation ("com.google.firebase:firebase-database")
-    implementation ("com.google.firebase:firebase-firestore")
-
 }
-
-
-
