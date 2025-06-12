@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "42361396884",
+    "project_id": "edu-news-9db2b",
+    "storage_bucket": "edu-news-9db2b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:42361396884:android:822cf5f9cddf04ce0b9e81",
+        "android_client_info": {
+          "package_name": "com.uoc.fot.ict.edunews"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHT6oW5GQNj7izwKt-ExdBeYu1aTpDQeI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
