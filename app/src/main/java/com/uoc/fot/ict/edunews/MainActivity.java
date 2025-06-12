@@ -83,10 +83,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUIWithUserData(DocumentSnapshot document) {
-        String name = document.getString("name") != null ? document.getString("name") : "Not provided";
+        String name = document.getString("username") != null ? document.getString("username") : "Not provided";
         String email = document.getString("email") != null ? document.getString("email") : "Not provided";
         String address = document.getString("address") != null ? document.getString("address") : "Not provided";
-        String mobile = document.getString("mobile") != null ? document.getString("mobile") : "Not provided";
+        String mobile = document.getString("mobileNumber") != null ? document.getString("mobileNumber") : "Not provided";
 
         welcomeText.setText(String.format("Welcome, %s!", name));
         nameText.setText(String.format("Name: %s", name));

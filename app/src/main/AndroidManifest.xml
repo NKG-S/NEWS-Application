@@ -15,42 +15,50 @@
 
         <activity
             android:name=".UserInfo"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false"/>
 
         <!-- SignUp Activity -->
         <activity
             android:name=".SignUp"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false"/>
 
         <!-- DevInfo Activity -->
         <activity
             android:name=".DevInfo"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false"/>
 
         <!-- NewsHome Activity -->
         <activity
             android:name=".NewsHome"
             android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/title_activity_news_home"/>
 
         <!-- ForgotPassword Activity -->
         <activity
             android:name=".FogotPassword"
-            android:exported="false"/>
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
 
         <!-- GetStart Activity -->
         <activity
             android:name=".GetStart"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false"/>
 
         <!-- SignIn Activity -->
         <activity
             android:name=".SignIn"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false"/>
 
         <!-- SplashScreen Activity (Launcher Activity) -->
         <activity
             android:name=".SplashScreen"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
