@@ -77,19 +77,20 @@
 
             <!-- Profile Picture with Edit Icon -->
             <RelativeLayout
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="24dp">
 
-                <ImageView
+                <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/profilePicture"
                     android:layout_width="110dp"
                     android:layout_height="110dp"
                     android:padding="4dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/user"
-                    app:tint="@color/black" />
+                    app:civ_border_color="@color/black"
+                    app:civ_border_width="2dp"/>
 
                 <ImageButton
                     android:id="@+id/editProfilePictureButton"
@@ -102,9 +103,8 @@
                     android:background="@drawable/circle_shape_red"
                     android:contentDescription="Edit Profile Picture"
                     android:src="@drawable/edit"
-                    app:tint="@color/white" /> <!-- Placeholder person icon -->
-
-                <!-- Placeholder edit icon -->
+                    app:tint="@color/white"
+                    android:visibility="gone" /> <!-- Initially hidden -->
 
             </RelativeLayout>
 
@@ -118,7 +118,6 @@
                 android:textColor="@color/black"
                 android:textSize="22sp" />
 
-
             <!-- Email Field -->
             <TextView
                 android:id="@+id/EmailTXT"
@@ -126,7 +125,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:fontFamily="@font/montserrat_medium"
-                android:text="Email"
+                android:text="Email Address"
                 android:textColor="@color/black"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -137,7 +136,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="nethminkavindu@gmail.com"
+                android:hint="Your email address"
                 app:boxStrokeColor="@color/black"
                 app:hintTextColor="@android:color/darker_gray">
 
@@ -156,45 +155,6 @@
                     android:cursorVisible="false" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Password Field -->
-            <TextView
-                android:id="@+id/PasswordTXT"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/montserrat_medium"
-                android:text="Password"
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/passwordInputLayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:passwordToggleEnabled="true"
-                android:hint="********"
-                app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray"
-                app:passwordToggleTint="@android:color/darker_gray">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/PasswordInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/montserrat"
-                    android:inputType="textPassword"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:enabled="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:longClickable="false"
-                    android:cursorVisible="false" />
-            </com.google.android.material.textfield.TextInputLayout>
-
             <!-- User Name Field -->
             <TextView
                 android:id="@+id/UserNameTXT"
@@ -202,7 +162,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:fontFamily="@font/montserrat_medium"
-                android:text="User Name"
+                android:text="Username"
                 android:textColor="@color/black"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -213,7 +173,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="Nethmin"
+                android:hint="Your username"
                 app:boxStrokeColor="@color/black"
                 app:hintTextColor="@android:color/darker_gray">
 
@@ -222,7 +182,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/montserrat"
-                    android:inputType="text"
+                    android:inputType="textCapWords"
                     android:textColor="@color/black"
                     android:textSize="14sp"
                     android:enabled="false"
@@ -232,7 +192,6 @@
                     android:cursorVisible="false" />
             </com.google.android.material.textfield.TextInputLayout>
 
-
             <!-- Address Field -->
             <TextView
                 android:id="@+id/AddressTXT"
@@ -240,7 +199,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:fontFamily="@font/montserrat_medium"
-                android:text="Address"
+                android:text="Residential Address"
                 android:textColor="@color/black"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -251,7 +210,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="294/2, Mapalagama Road, Mattaka"
+                android:hint="Your full address"
                 app:boxStrokeColor="@color/black"
                 app:hintTextColor="@android:color/darker_gray">
 
@@ -280,7 +239,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:fontFamily="@font/montserrat_medium"
-                android:text="Mobile Number"
+                android:text="Mobile Phone Number"
                 android:textColor="@color/black"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -291,7 +250,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="+94 721663030"
+                android:hint="e.g., +94 712345678"
                 app:boxStrokeColor="@color/black"
                 app:hintTextColor="@android:color/darker_gray">
 
@@ -311,7 +270,6 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Sign Out / Save Button -->
-
             <Button
                 android:id="@+id/mainActionButton"
                 android:layout_width="match_parent"
@@ -326,5 +284,16 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <!-- Progress Bar (Added to the ConstraintLayout) -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
