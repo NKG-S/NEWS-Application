@@ -3,134 +3,234 @@ package com.uoc.fot.ict.edunews;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.uoc.fot.ict.edunews.MainActivity;
-import com.uoc.fot.ict.edunews.R;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore; // Import for Firestore
+import com.google.firebase.firestore.FieldValue; // Import for server timestamp
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class SignUp extends AppCompatActivity {
 
-    private EditText usernameInput, emailInput, passwordInput, confirmPasswordInput;
+    private static final String TAG = "SignUpActivity"; // Tag for logging
+
+    // Firebase instances
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db; // Firebase Firestore instance
+
+    // UI elements
+    private TextInputEditText usernameInput, addressInput, mobileNumberInput, emailInput, passwordInput, confirmPasswordInput;
+    private TextInputLayout usernameInputLayout, addressInputLayout, mobileNumberInputLayout, emailInputLayout, passwordInputLayout, confirmPasswordInputLayout;
     private Button registerButton;
+    private TextView signInText;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
+        // Initialize Firebase instances
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance(); // Initialize Cloud Firestore
+
+        // Initialize TextInputEditText views
+        usernameInput = findViewById(R.id.UsernameInput);
+        addressInput = findViewById(R.id.AddressInput);
+        mobileNumberInput = findViewById(R.id.MobileNumberInput);
         emailInput = findViewById(R.id.EmailInput);
         passwordInput = findViewById(R.id.PasswordInput);
         confirmPasswordInput = findViewById(R.id.ConfirmPasswordInput);
-        usernameInput = findViewById(R.id.UsernameInput);
+
+        // Initialize TextInputLayout views to set errors directly
+        usernameInputLayout = findViewById(R.id.usernameInputLayout);
+        addressInputLayout = findViewById(R.id.AddressInputLayout);
+        mobileNumberInputLayout = findViewById(R.id.MobileNumberInputLayout);
+        emailInputLayout = findViewById(R.id.emailInputLayout);
+        passwordInputLayout = findViewById(R.id.passwordInputLayout);
+        confirmPasswordInputLayout = findViewById(R.id.confirmPasswordInputLayout);
+
         registerButton = findViewById(R.id.RegisterButton);
+        signInText = findViewById(R.id.SignInTXT);
+        progressBar = findViewById(R.id.progressBar); // Initialize the progress bar
+
+        // Set click listener for register button
         registerButton.setOnClickListener(v -> attemptRegistration());
+
+        // Set click listener for sign in text
+        signInText.setOnClickListener(v -> {
+            // Navigate to SignIn activity (assuming MainActivity is your sign-in page)
+            Intent intent = new Intent(SignUp.this, MainActivity.class);
+            startActivity(intent);
+            finish(); // Finish the SignUp activity so the user can't go back with back button
+        });
     }
 
     private void attemptRegistration() {
-        // Reset errors
-        usernameInput.setError(null);
-        emailInput.setError(null);
-        passwordInput.setError(null);
-        confirmPasswordInput.setError(null);
+        // Reset errors for all fields
+        usernameInputLayout.setError(null);
+        addressInputLayout.setError(null);
+        mobileNumberInputLayout.setError(null);
+        emailInputLayout.setError(null);
+        passwordInputLayout.setError(null);
+        confirmPasswordInputLayout.setError(null);
 
-        String username = usernameInput.getText().toString().trim();
-        String email = emailInput.getText().toString().trim();
-        String password = passwordInput.getText().toString().trim();
-        String confirmPassword = confirmPasswordInput.getText().toString().trim();
+        String username = Objects.requireNonNull(usernameInput.getText()).toString().trim();
+        String address = Objects.requireNonNull(addressInput.getText()).toString().trim();
+        String mobileNumber = Objects.requireNonNull(mobileNumberInput.getText()).toString().trim();
+        String email = Objects.requireNonNull(emailInput.getText()).toString().trim();
+        String password = Objects.requireNonNull(passwordInput.getText()).toString().trim();
+        String confirmPassword = Objects.requireNonNull(confirmPasswordInput.getText()).toString().trim();
 
         boolean cancel = false; // Flag to indicate if any validation failed
 
         // Validate username
         if (TextUtils.isEmpty(username)) {
-            usernameInput.setError("Username is required");
+            usernameInputLayout.setError("Username is required.");
+            cancel = true;
+        }
+
+        // Validate address
+        if (TextUtils.isEmpty(address)) {
+            addressInputLayout.setError("Address is required.");
+            cancel = true;
+        }
+
+        // Validate mobile number (10 digits)
+        if (TextUtils.isEmpty(mobileNumber)) {
+            mobileNumberInputLayout.setError("Mobile Number is required.");
+            cancel = true;
+        } else if (!Pattern.matches("\\d{10}", mobileNumber)) { // Simple check for 10 digits
+            mobileNumberInputLayout.setError("Please enter a valid 10-digit mobile number.");
             cancel = true;
         }
 
         // Validate email
         if (TextUtils.isEmpty(email)) {
-            emailInput.setError("Email is required");
+            emailInputLayout.setError("Email is required.");
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            emailInput.setError("Please enter a valid email address.");
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailInputLayout.setError("Please enter a valid email address.");
             cancel = true;
         }
 
-        // Validate password
+        // Validate password (complexity rules)
         if (TextUtils.isEmpty(password)) {
-            passwordInput.setError("Password is required.");
+            passwordInputLayout.setError("Password is required.");
             cancel = true;
         } else if (!isPasswordValid(password)) {
-            // isPasswordValid will set the error on passwordInput directly if invalid
+            // isPasswordValid will set the error on passwordInputLayout directly if invalid
             cancel = true;
         }
 
         // Validate confirm password
         if (TextUtils.isEmpty(confirmPassword)) {
-            confirmPasswordInput.setError("Please confirm your password.");
+            confirmPasswordInputLayout.setError("Please confirm your password.");
             cancel = true;
         } else if (!password.equals(confirmPassword)) {
-            confirmPasswordInput.setError("Passwords don't match. Please try again.");
+            confirmPasswordInputLayout.setError("Passwords don't match. Please try again.");
             cancel = true;
         }
 
         if (cancel) {
-            // If any validation failed, show a general toast message as well.
             Toast.makeText(this, "Please fix the errors to proceed.", Toast.LENGTH_SHORT).show();
         } else {
-            // All validations passed, proceed with registration
-            registerUser(username, email, password);
+            // All validations passed, proceed with Firebase registration
+            progressBar.setVisibility(View.VISIBLE); // Show progress bar
+            registerUserInFirebase(email, password, username, address, mobileNumber);
         }
-    }
-
-    private boolean isEmailValid(String email) {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     private boolean isPasswordValid(String password) {
-        // We'll set the error directly on the passwordInput field
-        // and return false if any condition isn't met.
-        // This makes the error messages directly visible on the input field.
-
+        // Set error directly on the TextInputLayout and return false if a condition isn't met.
         if (password.length() < 8) {
-            passwordInput.setError("Password must be at least 8 characters long.");
+            passwordInputLayout.setError("Password must be at least 8 characters long.");
             return false;
         }
-
         if (!password.matches(".*[A-Z].*")) {
-            passwordInput.setError("Password needs at least one uppercase letter.");
+            passwordInputLayout.setError("Password needs at least one uppercase letter.");
             return false;
         }
-
         if (!password.matches(".*[a-z].*")) {
-            passwordInput.setError("Password needs at least one lowercase letter.");
+            passwordInputLayout.setError("Password needs at least one lowercase letter.");
             return false;
         }
-
         if (!password.matches(".*\\d.*")) {
-            passwordInput.setError("Password needs at least one digit.");
+            passwordInputLayout.setError("Password needs at least one digit.");
             return false;
         }
-
         if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
-            passwordInput.setError("Password needs at least one special character.");
+            passwordInputLayout.setError("Password needs at least one special character.");
             return false;
         }
-
         return true; // All password rules are met
     }
 
-    private void registerUser(String username, String email, String password) {
-        // Here you would typically make an API call to register the user
-        // For now, we'll just show a success message
-        Toast.makeText(this, "Registration successful! Welcome, " + username + "!", Toast.LENGTH_LONG).show();
+    private void registerUserInFirebase(String email, String password, String username, String address, String mobileNumber) {
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        progressBar.setVisibility(View.GONE); // Hide progress bar
 
-        // Optionally navigate to another activity after successful registration
-        // Intent intent = new Intent(SignUp.this, HomeActivity.class);
-        // startActivity(intent);
-        // finish();
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "createUserWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                            if (user != null) {
+                                // Save additional user details to Cloud Firestore
+                                saveUserDataToFirestore(user.getUid(), username, address, mobileNumber, email);
+
+                                Toast.makeText(SignUp.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                                // Navigate to the main activity or a welcome screen
+                                Intent intent = new Intent(SignUp.this, MainActivity.class);
+                                startActivity(intent);
+                                finish(); // Prevent going back to SignUp
+                            }
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                            String errorMessage = "Registration failed.";
+                            if (task.getException() != null) {
+                                errorMessage += " " + task.getException().getMessage();
+                            }
+                            Toast.makeText(SignUp.this, errorMessage, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    // Save user data to Cloud Firestore
+    private void saveUserDataToFirestore(String userId, String username, String address, String mobileNumber, String email) {
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("username", username);
+        userMap.put("email", email);
+        userMap.put("address", address);
+        userMap.put("mobileNumber", mobileNumber);
+        userMap.put("createdAt", FieldValue.serverTimestamp()); // Firestore server timestamp
+
+        db.collection("users").document(userId)
+                .set(userMap)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "User data saved to Firestore successfully!"))
+                .addOnFailureListener(e -> Log.e(TAG, "Error saving user data to Firestore", e));
     }
 }
