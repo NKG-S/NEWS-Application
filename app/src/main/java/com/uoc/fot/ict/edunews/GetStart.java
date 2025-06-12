@@ -1,6 +1,7 @@
 package com.uoc.fot.ict.edunews;
 
 import android.content.Intent;
+import android.content.SharedPreferences; // Import SharedPreferences
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
@@ -13,27 +14,37 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class GetStart extends AppCompatActivity {
 
+    private static final String PREFS_NAME = "MyAppPrefs"; // Must match SplashScreen
+    private static final String KEY_FIRST_LAUNCH = "is_first_launch"; // Must match SplashScreen
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_get_start);
 
-        Button getStartButton;
-
-        getStartButton = findViewById(R.id.getstart);
+        Button getStartButton = findViewById(R.id.getstart);
 
         getStartButton.setOnClickListener(view -> {
             Toast.makeText(this, "Get Started", Toast.LENGTH_SHORT).show();
+
+            // Set the flag to false, indicating app has been launched once
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(KEY_FIRST_LAUNCH, false);
+            editor.apply(); // Use apply() for async save
+
             Intent intent = new Intent(GetStart.this, SignIn.class);
             startActivity(intent);
+            finish(); // Finish the GetStart activity so user can't go back to it
         });
 
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.UserInfo), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        // Ensure the correct ID is used here. It was 'UserInfo' in your snippet.
+        // Assuming 'main' is the root layout ID for activity_get_start.
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+//            return insets;
+//        });
     }
 }
