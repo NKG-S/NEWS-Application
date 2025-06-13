@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class SignUp extends AppCompatActivity {
 
-    private static final String TAG = "SignUp"; // Tag for logging
+    private static final String TAG = "SignUpActivity"; // Tag for logging
 
     // Firebase instances
     private FirebaseAuth mAuth;
@@ -227,6 +227,7 @@ public class SignUp extends AppCompatActivity {
         userMap.put("address", address);
         userMap.put("mobileNumber", mobileNumber);
         userMap.put("createdAt", FieldValue.serverTimestamp()); // Firestore server timestamp
+        userMap.put("author", false); // Set the default value of "author" to false
 
         db.collection("users").document(userId)
                 .set(userMap)
