@@ -50,7 +50,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class UserInfo extends AppCompatActivity {
 
-    private static final String TAG = "UserInfoActivity";
+    private static final String TAG = "UserInfo";
 
     // UI Elements
     private TextInputEditText usernameInput, addressInput, mobileInput, emailInput;
