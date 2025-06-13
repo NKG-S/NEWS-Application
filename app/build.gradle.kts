@@ -62,6 +62,10 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.9.0")
     implementation("androidx.fragment:fragment-ktx:1.8.1")
 
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
+
+
     // Testing Dependencies
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
