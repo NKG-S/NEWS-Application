@@ -2,11 +2,11 @@ package com.uoc.fot.ict.edunews;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils; // Import TextUtils
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar; // Import ProgressBar
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,11 +18,11 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputEditText; // Use TextInputEditText
-import com.google.android.material.textfield.TextInputLayout; // Use TextInputLayout
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.Objects; // Import Objects
+import java.util.Objects;
 
 public class FogotPassword extends AppCompatActivity {
 

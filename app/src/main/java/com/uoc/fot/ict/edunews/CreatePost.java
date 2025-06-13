@@ -1,4 +1,4 @@
-package com.uoc.fot.ict.edunews; // IMPORTANT: Ensure this matches your actual package name
+package com.uoc.fot.ict.edunews;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,40 +36,41 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class CreatePost extends AppCompatActivity {
 
     private static final int PICK_IMAGE_REQUEST = 1;
-
-    // UI Elements
-    private ImageButton backButton;
-    private CircleImageView profileIcon;
-    private TextInputEditText titleInput;
+    private ImageButton backButton, pickImageButton, clearImageButton;
+    private ShapeableImageView profileIcon;
+    private TextInputEditText titleInput, descriptionInput;
     private AutoCompleteTextView categoryInput;
-    private TextInputEditText descriptionInput;
     private ImageView postImagePreview;
-    private ImageButton pickImageButton;
     private Button submitButton;
     private ProgressBar progressBar;
-
-    // Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private FirebaseStorage storage;
-    private Uri imageUri; // To store the selected image URI
+    private Uri imageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_post); // Ensure this matches your XML file name
+        setContentView(R.layout.activity_create_post);
 
-        // Initialize Firebase instances
+        initializeFirebase();
+        initializeViews();
+        setupListeners();
+        loadUserProfilePicture();
+        setupCategoryDropdown();
+        updateImageButtonsVisibility();
+    }
+
+    private void initializeFirebase() {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
+    }
 
-        // Initialize UI elements
+    private void initializeViews() {
         backButton = findViewById(R.id.backButton);
         profileIcon = findViewById(R.id.profileIcon);
         titleInput = findViewById(R.id.TitleInput);
@@ -78,60 +80,42 @@ public class CreatePost extends AppCompatActivity {
         pickImageButton = findViewById(R.id.pickImageButton);
         submitButton = findViewById(R.id.submitButton);
         progressBar = findViewById(R.id.progressBar);
+        clearImageButton = findViewById(R.id.clearImageButton);
+    }
 
-        // Set up Listeners
+    private void setupListeners() {
         backButton.setOnClickListener(v -> navigateToMainActivity());
         pickImageButton.setOnClickListener(v -> openImagePicker());
         submitButton.setOnClickListener(v -> createNewPost());
-
-        // CORRECTED: Listener for profileIcon to navigate to user profile
         profileIcon.setOnClickListener(v -> navigateToUserProfile());
-
-        // Load user profile picture
-        loadUserProfilePicture();
-
-        // Set up Category Dropdown
-        setupCategoryDropdown();
+        clearImageButton.setOnClickListener(v -> clearSelectedImage());
     }
 
     private void navigateToMainActivity() {
-        Intent intent = new Intent(CreatePost.this, MainActivity.class);
-        startActivity(intent);
-        finish(); // Finish the current activity to prevent going back to it
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     private void navigateToUserProfile() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // THIS LINE IS CRUCIAL: Use YOUR UserProfileActivity class, not Firebase's UserInfo interface
-            Intent intent = new Intent(CreatePost.this, UserInfo.class);
-            // Optionally pass user ID to UserProfileActivity if it needs to fetch user specific data
+            Intent intent = new Intent(this, UserInfo.class);
             intent.putExtra("userId", currentUser.getUid());
             startActivity(intent);
         } else {
-            Toast.makeText(this, "You need to be logged in to view your profile.", Toast.LENGTH_SHORT).show();
-            // Optionally, prompt user to log in or navigate to login activity
+            Toast.makeText(this, "Please login to view profile", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void loadUserProfilePicture() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            Uri photoUrl = currentUser.getPhotoUrl();
-
-            if (photoUrl != null) {
-                // Use Glide to load the profile picture from the URL
-                Glide.with(this)
-                        .load(photoUrl)
-                        .placeholder(R.drawable.user) // Placeholder while loading
-                        .error(R.drawable.user) // Image to show if loading fails
-                        .into(profileIcon);
-            } else {
-                // If no photo URL is set in Firebase Auth, use the default drawable
-                profileIcon.setImageResource(R.drawable.user);
-            }
+        if (currentUser != null && currentUser.getPhotoUrl() != null) {
+            Glide.with(this)
+                    .load(currentUser.getPhotoUrl())
+                    .placeholder(R.drawable.user)
+                    .error(R.drawable.user)
+                    .into(profileIcon);
         } else {
-            // No user logged in, display default user icon
             profileIcon.setImageResource(R.drawable.user);
         }
     }
@@ -142,35 +126,45 @@ public class CreatePost extends AppCompatActivity {
                 "Social", "International", "Technology", "Health", "Education",
                 "Environment", "Art & Culture", "Science", "Lifestyle", "Travel"
         );
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_dropdown_item_1line, // A simple layout for dropdown items
+                R.layout.dropdown_item,
                 categories
         );
         categoryInput.setAdapter(adapter);
     }
 
     private void openImagePicker() {
-        Intent intent = new Intent();
-        intent.setType("image/*"); // Specifies that we want to pick an image
-        intent.setAction(Intent.ACTION_GET_CONTENT); // Action to pick content
-        startActivityForResult(Intent.createChooser(intent, "Select Post Image"), PICK_IMAGE_REQUEST);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
             try {
-                // Display the selected image in the ImageView
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
                 postImagePreview.setImageBitmap(bitmap);
+                updateImageButtonsVisibility();
             } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Failed to load image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void clearSelectedImage() {
+        imageUri = null;
+        postImagePreview.setImageResource(R.drawable.image_placeholder_background);
+        updateImageButtonsVisibility();
+    }
+
+    private void updateImageButtonsVisibility() {
+        pickImageButton.setVisibility(imageUri == null ? View.VISIBLE : View.GONE);
+        clearImageButton.setVisibility(imageUri != null ? View.VISIBLE : View.GONE);
     }
 
     private void createNewPost() {
@@ -178,28 +172,23 @@ public class CreatePost extends AppCompatActivity {
         String category = categoryInput.getText().toString().trim();
         String description = descriptionInput.getText().toString().trim();
 
-        // Input validation
         if (title.isEmpty()) {
-            titleInput.setError("Title is required");
-            titleInput.requestFocus();
+            titleInput.setError("Title required");
             return;
         }
         if (category.isEmpty()) {
-            categoryInput.setError("Category is required");
-            categoryInput.requestFocus();
+            categoryInput.setError("Category required");
             return;
         }
         if (description.isEmpty()) {
-            descriptionInput.setError("Description is required");
-            descriptionInput.requestFocus();
+            descriptionInput.setError("Description required");
             return;
         }
         if (imageUri == null) {
-            Toast.makeText(this, "Please select an image for your post.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please select an image", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Show progress bar and disable submit button
         progressBar.setVisibility(View.VISIBLE);
         submitButton.setEnabled(false);
 
@@ -207,79 +196,56 @@ public class CreatePost extends AppCompatActivity {
     }
 
     private void uploadImageToFirebase(String title, String category, String description) {
-        // Create a unique name for the image in Firebase Storage
-        StorageReference storageRef = storage.getReference().child("post_images/" + UUID.randomUUID().toString());
+        StorageReference storageRef = storage.getReference()
+                .child("post_images/" + UUID.randomUUID().toString());
 
         storageRef.putFile(imageUri)
-                .addOnSuccessListener(taskSnapshot -> {
-                    // Image uploaded successfully, now get its download URL
-                    storageRef.getDownloadUrl().addOnSuccessListener(downloadUri -> {
-                        savePostToFirestore(title, category, description, downloadUri.toString());
-                    }).addOnFailureListener(e -> {
-                        progressBar.setVisibility(View.GONE);
-                        submitButton.setEnabled(true);
-                        Toast.makeText(CreatePost.this, "Failed to get image download URL: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
-                })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    submitButton.setEnabled(true);
-                    Toast.makeText(CreatePost.this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+                .addOnSuccessListener(taskSnapshot ->
+                        storageRef.getDownloadUrl().addOnSuccessListener(uri ->
+                                savePostToFirestore(title, category, description, uri.toString())
+                        ).addOnFailureListener(this::handleUploadFailure)
+                )
+                .addOnFailureListener(this::handleUploadFailure);
     }
 
     private void savePostToFirestore(String title, String category, String description, String imageUrl) {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            progressBar.setVisibility(View.GONE);
-            submitButton.setEnabled(true);
-            Toast.makeText(this, "User not logged in. Cannot create post.", Toast.LENGTH_SHORT).show();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            handleUploadFailure(new Exception("User not logged in"));
             return;
         }
 
-        // Get author name: Prioritize Firebase Auth display name, otherwise default
-        String authorName = currentUser.getDisplayName();
-        if (authorName == null || authorName.isEmpty()) {
-            authorName = "Anonymous"; // Default if display name is not set
-            // You might want to fetch this from a 'users' collection in Firestore if available
-        }
-
-        // Get current date and time for post date
-        String postDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
-
-        // Create a map to store post data
         Map<String, Object> post = new HashMap<>();
         post.put("title", title);
         post.put("category", category);
         post.put("description", description);
         post.put("imageUrl", imageUrl);
-        post.put("author", authorName);
-        post.put("postDate", postDate);
-        post.put("userId", currentUser.getUid()); // Store the UID of the author
+        post.put("author", user.getDisplayName() != null ? user.getDisplayName() : "Anonymous");
+        post.put("postDate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+        post.put("userId", user.getUid());
 
-        // Add the post to the "posts" collection in Firestore
         db.collection("posts")
                 .add(post)
-                .addOnSuccessListener(documentReference -> {
+                .addOnSuccessListener(ref -> {
                     progressBar.setVisibility(View.GONE);
                     submitButton.setEnabled(true);
-                    Toast.makeText(CreatePost.this, "Post created successfully!", Toast.LENGTH_SHORT).show();
-                    clearFields(); // Clear input fields after successful post
+                    Toast.makeText(this, "Post created!", Toast.LENGTH_SHORT).show();
+                    clearFields();
                 })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    submitButton.setEnabled(true);
-                    Toast.makeText(CreatePost.this, "Error creating post: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+                .addOnFailureListener(this::handleUploadFailure);
+    }
+
+    private void handleUploadFailure(Exception e) {
+        progressBar.setVisibility(View.GONE);
+        submitButton.setEnabled(true);
+        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     private void clearFields() {
         titleInput.setText("");
         categoryInput.setText("");
         descriptionInput.setText("");
-        postImagePreview.setImageResource(R.drawable.image_placeholder_background); // Reset image preview to placeholder
-        imageUri = null; // Clear the stored image URI
-        // Remove error messages
+        clearSelectedImage();
         titleInput.setError(null);
         categoryInput.setError(null);
         descriptionInput.setError(null);

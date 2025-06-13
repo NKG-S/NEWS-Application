@@ -28,11 +28,6 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" /> <!-- NewsHome Activity -->
         <activity
-            android:name=".NewsHome"
-            android:exported="false"
-            android:label="@string/title_activity_news_home"
-            android:windowSoftInputMode="adjustResize" /> <!-- ForgotPassword Activity -->
-        <activity
             android:name=".FogotPassword"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" /> <!-- GetStart Activity -->
