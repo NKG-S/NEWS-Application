@@ -4,4 +4,9 @@
     <color name="white">#FFFFFFFF</color>
     <color name="ButtonColour">#F83758</color>
     <color name="RedColour">#F83758</color>
+    <color name="grey">#FF888888</color>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="light_grey">#E0E0E0</color>
 </resources>

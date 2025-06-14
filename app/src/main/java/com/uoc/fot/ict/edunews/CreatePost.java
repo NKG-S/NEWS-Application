@@ -84,15 +84,15 @@ public class CreatePost extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        backButton.setOnClickListener(v -> navigateToMainActivity());
+        backButton.setOnClickListener(v -> navigateToHome());
         pickImageButton.setOnClickListener(v -> openImagePicker());
         submitButton.setOnClickListener(v -> createNewPost());
         profileIcon.setOnClickListener(v -> navigateToUserProfile());
         clearImageButton.setOnClickListener(v -> clearSelectedImage());
     }
 
-    private void navigateToMainActivity() {
-        startActivity(new Intent(this, MainActivity.class));
+    private void navigateToHome() {
+        startActivity(new Intent(this, home.class));
         finish();
     }
 
@@ -158,7 +158,7 @@ public class CreatePost extends AppCompatActivity {
 
     private void clearSelectedImage() {
         imageUri = null;
-        postImagePreview.setImageResource(R.drawable.image_placeholder_background);
+        postImagePreview.setImageResource(R.drawable.add_icon);
         updateImageButtonsVisibility();
     }
 

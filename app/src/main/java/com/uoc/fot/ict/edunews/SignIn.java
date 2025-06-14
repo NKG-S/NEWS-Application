@@ -85,9 +85,8 @@ public class SignIn extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // User is already signed in, navigate to MainActivity
             Log.d(TAG, "User already signed in: " + currentUser.getEmail());
-            navigateToMainActivity();
+            navigateToHome();
         }
     }
 
@@ -137,7 +136,7 @@ public class SignIn extends AppCompatActivity {
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(SignIn.this, "Login successful! Welcome.", Toast.LENGTH_SHORT).show();
-                            navigateToMainActivity();
+                            navigateToHome();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -151,8 +150,8 @@ public class SignIn extends AppCompatActivity {
                 });
     }
 
-    private void navigateToMainActivity() {
-        Intent intent = new Intent(SignIn.this, MainActivity.class);
+    private void navigateToHome() {
+        Intent intent = new Intent(SignIn.this, home.class);
         startActivity(intent);
         finish(); // Finish the SignIn activity so user can't go back to it after successful login
     }

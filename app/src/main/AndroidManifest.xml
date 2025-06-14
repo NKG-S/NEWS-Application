@@ -13,32 +13,45 @@
         android:theme="@style/Theme.EDUNews"
         tools:targetApi="31">
         <activity
+            android:name=".CategoryNews"
+            android:exported="false"
+            android:parentActivityName=".home"/>
+        <activity
+            android:name=".home"
+            android:exported="false"/>
+        <activity
             android:name=".CreatePost"
+            android:parentActivityName=".home"
             android:exported="false" />
         <activity
             android:name=".UserInfo"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" /> <!-- SignUp Activity -->
+            android:parentActivityName=".home"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".SignUp"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" /> <!-- DevInfo Activity -->
+            android:parentActivityName=".SignIn"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".DevInfo"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" /> <!-- NewsHome Activity -->
+            android:parentActivityName=".home"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".FogotPassword"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" /> <!-- GetStart Activity -->
+            android:parentActivityName=".SignIn"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".GetStart"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" /> <!-- SignIn Activity -->
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".SignIn"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize" /> <!-- SplashScreen Activity (Launcher Activity) -->
+            android:parentActivityName=".SplashScreen"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".SplashScreen"
             android:exported="true"

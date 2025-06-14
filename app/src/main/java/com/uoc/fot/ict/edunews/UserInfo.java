@@ -54,7 +54,7 @@ public class UserInfo extends AppCompatActivity {
     // UI Elements
     private TextInputEditText usernameInput, addressInput, mobileInput, emailInput;
     private TextInputLayout usernameInputLayout, addressInputLayout, mobileInputLayout, emailInputLayout;
-    private Button editSaveButton, mainActionButton;
+    private Button editSaveButton, mainActionButton, writeNewPostButton; // Added writeNewPostButton
     private ImageButton backButton, editProfilePictureButton;
     private CircleImageView profilePicture;
     private ProgressBar progressBar;
@@ -72,6 +72,7 @@ public class UserInfo extends AppCompatActivity {
     private String currentMobile;
     private String currentEmail;
     private String currentProfilePictureUrl;
+    private boolean isAuthor = false; // Added isAuthor flag
     private Uri selectedImageUri; // For newly selected profile picture
 
     private boolean isEditMode = false; // Initial state is view mode
@@ -113,6 +114,7 @@ public class UserInfo extends AppCompatActivity {
 
         editSaveButton = findViewById(R.id.editSaveButton);
         mainActionButton = findViewById(R.id.mainActionButton);
+        writeNewPostButton = findViewById(R.id.WriteNewPost); // Initialize the new button
         backButton = findViewById(R.id.backButton);
         profilePicture = findViewById(R.id.profilePicture);
         editProfilePictureButton = findViewById(R.id.editProfilePictureButton);
@@ -153,6 +155,7 @@ public class UserInfo extends AppCompatActivity {
                 isEditMode = false;
                 displayUserData(false);
                 selectedImageUri = null;
+                updateAuthorButtonVisibility(); // Re-evaluate visibility after cancelling edit
             } else {
                 signOutUser();
             }
@@ -164,6 +167,13 @@ public class UserInfo extends AppCompatActivity {
             if (isEditMode) {
                 openImageChooser();
             }
+        });
+
+        // Set listener for the new "Write A new post" button
+        writeNewPostButton.setOnClickListener(v -> {
+            Toast.makeText(UserInfo.this, "Opening new post activity...", Toast.LENGTH_SHORT).show();
+             Intent intent = new Intent(UserInfo.this, CreatePost.class);
+             startActivity(intent);
         });
     }
 
@@ -186,9 +196,13 @@ public class UserInfo extends AppCompatActivity {
                             currentMobile = document.getString("mobile");
                             currentEmail = currentUser.getEmail();
                             currentProfilePictureUrl = document.getString("profilePictureUrl");
+                            // Retrieve author status
+                            Boolean authorStatus = document.getBoolean("author");
+                            isAuthor = (authorStatus != null && authorStatus); // Default to false if not found/null
 
-                            Log.d(TAG, "User data fetched: " + currentUsername);
+                            Log.d(TAG, "User data fetched: " + currentUsername + ", isAuthor: " + isAuthor);
                             displayUserData(false);
+                            updateAuthorButtonVisibility(); // Update button visibility after data is fetched
                         } else {
                             Log.d(TAG, "User data document does not exist, creating default.");
                             currentEmail = currentUser.getEmail();
@@ -196,6 +210,7 @@ public class UserInfo extends AppCompatActivity {
                             currentAddress = "";
                             currentMobile = "";
                             currentProfilePictureUrl = "";
+                            isAuthor = false; // Default to not author if document doesn't exist
 
                             Map<String, Object> defaultUserData = new HashMap<>();
                             defaultUserData.put("username", currentUsername);
@@ -203,25 +218,28 @@ public class UserInfo extends AppCompatActivity {
                             defaultUserData.put("address", currentAddress);
                             defaultUserData.put("mobile", currentMobile);
                             defaultUserData.put("profilePictureUrl", currentProfilePictureUrl);
+                            defaultUserData.put("author", isAuthor); // Add author field to default data
 
                             db.collection("users").document(userId).set(defaultUserData)
                                     .addOnSuccessListener(aVoid -> Log.d(TAG, "Default user data created in Firestore."))
                                     .addOnFailureListener(e -> Log.e(TAG, "Error creating default user data", e));
 
                             displayUserData(false);
+                            updateAuthorButtonVisibility(); // Update button visibility after default data set
                         }
                     } else {
                         Log.e(TAG, "Failed to load user data from Firestore: ", task.getException());
                         Toast.makeText(UserInfo.this, "Failed to load user data: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         currentEmail = currentUser.getEmail();
                         displayUserData(false);
+                        updateAuthorButtonVisibility(); // Ensure button visibility is handled even on error
                     }
                 }
             });
         } else {
             Log.d(TAG, "No current user, redirecting to SignIn.");
             Toast.makeText(this, "User not logged in. Please sign in.", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(UserInfo.this, MainActivity.class);
+            Intent intent = new Intent(UserInfo.this, SignIn.class); // Assuming SignIn is your login activity
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
@@ -274,6 +292,8 @@ public class UserInfo extends AppCompatActivity {
             mobileInput.setTextColor(getResources().getColor(R.color.black, getTheme()));
             emailInput.setTextColor(getResources().getColor(R.color.black, getTheme()));
 
+            writeNewPostButton.setVisibility(View.GONE); // Hide "Write New Post" button when in edit mode
+
         } else { // View Mode
             editSaveButton.setText("Edit");
             editSaveButton.setVisibility(View.VISIBLE);
@@ -289,6 +309,8 @@ public class UserInfo extends AppCompatActivity {
             addressInput.setTextColor(Color.parseColor("#80000000"));
             mobileInput.setTextColor(Color.parseColor("#80000000"));
             emailInput.setTextColor(Color.parseColor("#80000000"));
+
+            updateAuthorButtonVisibility(); // Show "Write New Post" button based on isAuthor flag when in view mode
         }
     }
 
@@ -310,6 +332,17 @@ public class UserInfo extends AppCompatActivity {
         isEditMode = !isEditMode;
         displayUserData(isEditMode);
         selectedImageUri = null;
+    }
+
+    /**
+     * Updates the visibility of the "Write A New Post" button based on the isAuthor flag.
+     */
+    private void updateAuthorButtonVisibility() {
+        if (!isEditMode && isAuthor) {
+            writeNewPostButton.setVisibility(View.VISIBLE);
+        } else {
+            writeNewPostButton.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -359,6 +392,9 @@ public class UserInfo extends AppCompatActivity {
             userData.put("address", newAddress);
             userData.put("mobile", newMobile);
 
+            // Do not update 'author' status here as it's typically an admin-set permission.
+            // If you want users to be able to request author status, that's a different flow.
+
             if (!newUsername.equals(currentUser.getDisplayName())) {
                 currentUser.updateProfile(new com.google.firebase.auth.UserProfileChangeRequest.Builder()
                                 .setDisplayName(newUsername)
@@ -384,6 +420,7 @@ public class UserInfo extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(UserInfo.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
                             toggleEditMode();
+                            updateAuthorButtonVisibility(); // Re-evaluate visibility after saving
                         }
                     })
                     .addOnFailureListener(e -> {
@@ -411,6 +448,7 @@ public class UserInfo extends AppCompatActivity {
             Toast.makeText(this, "No image selected for upload.", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
             toggleEditMode();
+            updateAuthorButtonVisibility(); // Re-evaluate visibility if upload is skipped
             return;
         }
 
@@ -456,11 +494,13 @@ public class UserInfo extends AppCompatActivity {
                                             selectedImageUri = null; // Clear selected image
                                             progressBar.setVisibility(View.GONE);
                                             toggleEditMode(); // Switch back to view mode
+                                            updateAuthorButtonVisibility(); // Re-evaluate visibility after upload
                                         }))
                                         .addOnFailureListener(e -> handler.post(() -> {
                                             Toast.makeText(UserInfo.this, "Failed to update profile picture URL in Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                             progressBar.setVisibility(View.GONE);
                                             toggleEditMode();
+                                            updateAuthorButtonVisibility(); // Re-evaluate visibility after error
                                         }));
                             });
                         })
@@ -468,6 +508,7 @@ public class UserInfo extends AppCompatActivity {
                             Toast.makeText(UserInfo.this, "Failed to upload profile picture: " + e.getMessage(), Toast.LENGTH_LONG).show();
                             progressBar.setVisibility(View.GONE);
                             toggleEditMode();
+                            updateAuthorButtonVisibility(); // Re-evaluate visibility after error
                         }));
 
             } catch (IOException e) {
@@ -476,6 +517,7 @@ public class UserInfo extends AppCompatActivity {
                     Toast.makeText(UserInfo.this, "Error processing image: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     progressBar.setVisibility(View.GONE);
                     toggleEditMode();
+                    updateAuthorButtonVisibility(); // Re-evaluate visibility after error
                 });
             }
         });
@@ -489,8 +531,7 @@ public class UserInfo extends AppCompatActivity {
         if (currentUser != null) {
             mAuth.signOut();
             Toast.makeText(this, "Signed out successfully.", Toast.LENGTH_SHORT).show();
-            // Redirect to login screen (MainActivity assuming it's the login screen)
-            Intent intent = new Intent(UserInfo.this, MainActivity.class);
+            Intent intent = new Intent(UserInfo.this, SignIn.class); // Assuming SignIn is your login activity
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Clear back stack
             startActivity(intent);
             finish(); // Finish current activity
@@ -507,8 +548,9 @@ public class UserInfo extends AppCompatActivity {
             isEditMode = false;
             displayUserData(false);
             selectedImageUri = null;
+            updateAuthorButtonVisibility(); // Re-evaluate visibility after cancelling edit via back button
         } else {
-            Intent intent = new Intent(UserInfo.this, MainActivity.class);
+            Intent intent = new Intent(UserInfo.this, home.class); // Assuming 'home.class' is your main activity
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();

@@ -77,8 +77,7 @@ public class SignUp extends AppCompatActivity {
 
         // Set click listener for sign in text
         signInText.setOnClickListener(v -> {
-            // Navigate to SignIn activity (assuming MainActivity is your sign-in page)
-            Intent intent = new Intent(SignUp.this, MainActivity.class);
+            Intent intent = new Intent(SignUp.this, SignIn.class);
             startActivity(intent);
             finish(); // Finish the SignUp activity so the user can't go back with back button
         });
@@ -202,7 +201,7 @@ public class SignUp extends AppCompatActivity {
 
                                 Toast.makeText(SignUp.this, "Registration successful!", Toast.LENGTH_SHORT).show();
                                 // Navigate to the main activity or a welcome screen
-                                Intent intent = new Intent(SignUp.this, MainActivity.class);
+                                Intent intent = new Intent(SignUp.this, home.class);
                                 startActivity(intent);
                                 finish(); // Prevent going back to SignUp
                             }
