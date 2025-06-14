@@ -2,7 +2,7 @@ package com.uoc.fot.ict.edunews;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log; // Added for logging errors
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -179,7 +179,7 @@ public class home extends AppCompatActivity {
     private void onCategorySelected(Category category) {
         Toast.makeText(this, "Category selected: " + category.getName(), Toast.LENGTH_SHORT).show();
         // Start CategoryNews activity and pass the selected category name
-        Intent intent = new Intent(home.this, CategoryNews.class); // Changed from CategoryNewsActivity to CategoryNews based on file structure
+        Intent intent = new Intent(home.this, CategoryNews.class);
         intent.putExtra(CategoryNews.EXTRA_CATEGORY_NAME, category.getName());
         startActivity(intent);
     }
@@ -240,13 +240,18 @@ public class home extends AppCompatActivity {
         return new NewsArticle(id, title, description, imageUrl, postDate, category, author, userId);
     }
 
+    /**
+     * Callback method when a news article card is clicked.
+     * Navigates to the News activity for the selected article.
+     *
+     * @param newsArticle The NewsArticle object that was clicked.
+     */
     private void navigateToNewsDetail(NewsArticle newsArticle) {
-        // IMPORTANT: Assuming NewsDetailActivity is the correct class name for your news detail screen.
-        // If your detail screen is named something else (e.g., MainActivity as was in your previous code),
-        // please adjust this line accordingly. Based on common Android practices, a dedicated NewsDetailActivity
-        // is most appropriate for displaying a single news article's full content.
-        Intent intent = new Intent(this, MainActivity.class); // Corrected to NewsDetailActivity
-        intent.putExtra("newsArticle", newsArticle); // Pass the NewsArticle object (NewsArticle must be Parcelable/Serializable)
+        // Corrected Intent: Pass only the article ID to the News activity
+        Intent intent = new Intent(this, news.class);
+        intent.putExtra("NEWS_ARTICLE_ID", newsArticle.getId()); // Pass the document ID
         startActivity(intent);
+
+        Toast.makeText(this, "Opening article: " + newsArticle.getTitle(), Toast.LENGTH_SHORT).show();
     }
 }

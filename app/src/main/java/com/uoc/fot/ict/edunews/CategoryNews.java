@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -120,6 +121,10 @@ public class CategoryNews extends AppCompatActivity {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             // Convert each Firestore document to a NewsArticle object
                             NewsArticle article = document.toObject(NewsArticle.class);
+                            // **** FIX APPLIED HERE ****
+                            // Explicitly set the document ID to the NewsArticle object
+                            // This ensures article.getId() does not return null later.
+                            article.setId(document.getId());
                             articlesList.add(article); // Add to the list
                         }
 
@@ -208,19 +213,16 @@ public class CategoryNews extends AppCompatActivity {
 
     /**
      * Callback method when a news article card is clicked.
-     * Navigates to the NewsDetailActivity (or equivalent) for the selected article.
+     * Navigates to the News activity for the selected article.
      *
      * @param article The NewsArticle object that was clicked.
      */
     private void navigateToNewsDetail(NewsArticle article) {
-        // Here you would typically start a new activity to show the full details of the article.
-        // NewsArticle class must implement Parcelable or Serializable to be passed via Intent.
-        // Assuming NewsArticle is Parcelable based on your provided code.
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("article", article); // Pass the NewsArticle object
+        // Corrected Intent: Pass only the article ID to the News activity
+        Intent intent = new Intent(this, news.class); // Ensure 'News' is the correct class name for your detail activity
+        intent.putExtra("NEWS_ARTICLE_ID", article.getId()); // Pass the document ID
         startActivity(intent);
 
-        // For now, just a Toast message if NewsDetailActivity isn't fully implemented yet
         Toast.makeText(this, "Opening article: " + article.getTitle(), Toast.LENGTH_SHORT).show();
     }
 }
