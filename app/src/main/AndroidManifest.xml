@@ -39,6 +39,11 @@
             android:parentActivityName=".home"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".news"
+            android:exported="false"
+            android:parentActivityName=".home"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".FogotPassword"
             android:exported="false"
             android:parentActivityName=".SignIn"

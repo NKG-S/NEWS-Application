@@ -2,7 +2,7 @@ package com.uoc.fot.ict.edunews;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log; // Added for logging errors
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,9 +35,14 @@ public class home extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private FirebaseUser currentUser; // Added to store the current user
 
     // To keep track of the last document from the latest news query for pagination
     private DocumentSnapshot lastDocumentOfLatestNews;
+
+    // Added TAG for logging errors
+    private static final String TAG = "HomeActivity";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +53,7 @@ public class home extends AppCompatActivity {
         initializeViews();
         setupAdapters();
         setupRefreshLayout();
-        loadUserProfilePicture();
+        loadCurrentUserProfilePicture(); // Calling the new, more robust method
         fetchData(); // Unified method to fetch all initial data
         setupListeners();
     }
@@ -56,6 +61,7 @@ public class home extends AppCompatActivity {
     private void initializeFirebase() {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        currentUser = mAuth.getCurrentUser(); // Initialize currentUser here
     }
 
     private void initializeViews() {
@@ -74,8 +80,8 @@ public class home extends AppCompatActivity {
 
     private void fetchData() {
         swipeRefreshLayout.setRefreshing(true); // Show refreshing indicator
-        fetchLatestNews(); // This will, in turn, call fetchOlderNews if successful
-        setupCategories(); // Categories are set up here, they are mostly static
+        fetchLatestNews();
+        setupCategories();
     }
 
     private void setupAdapters() {
@@ -83,7 +89,6 @@ public class home extends AppCompatActivity {
         latestNewsViewPager.setAdapter(latestNewsBannerAdapter);
         latestNewsViewPager.setOffscreenPageLimit(1);
 
-        // Ensure CategoryAdapter constructor expects List<Category> and Consumer<Category>
         categoryAdapter = new CategoryAdapter(new ArrayList<>(), this::onCategorySelected);
         categoriesRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         categoriesRecyclerView.setAdapter(categoryAdapter);
@@ -98,9 +103,8 @@ public class home extends AppCompatActivity {
     }
 
     private void navigateToUserProfile() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            Intent intent = new Intent(this, UserInfo.class); // Assuming UserInfo is your profile activity
+            Intent intent = new Intent(this, UserInfo.class);
             intent.putExtra("userId", currentUser.getUid());
             startActivity(intent);
         } else {
@@ -108,23 +112,43 @@ public class home extends AppCompatActivity {
         }
     }
 
-    private void loadUserProfilePicture() {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null && currentUser.getPhotoUrl() != null) {
-            Glide.with(this)
-                    .load(currentUser.getPhotoUrl())
-                    .placeholder(R.drawable.user) // Default user icon if no photo
-                    .error(R.drawable.user) // Error icon if loading fails
-                    .into(profileIcon);
+    /**
+     * Loads the current user's profile picture into the top bar icon by fetching from Firestore.
+     */
+    private void loadCurrentUserProfilePicture() {
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            db.collection("users").document(userId).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String profilePictureUrl = documentSnapshot.getString("profilePictureUrl");
+                            if (profilePictureUrl != null && !profilePictureUrl.isEmpty()) {
+                                Glide.with(this)
+                                        .load(profilePictureUrl)
+                                        .placeholder(R.drawable.user) // Default user icon
+                                        .error(R.drawable.user)
+                                        .into(profileIcon);
+                            } else {
+                                profileIcon.setImageResource(R.drawable.user); // Default icon if URL is null/empty
+                            }
+                        } else {
+                            profileIcon.setImageResource(R.drawable.user); // Default icon if user doc not found
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to load profile picture for top bar: " + e.getMessage());
+                        profileIcon.setImageResource(R.drawable.user); // Fallback to default icon on error
+                    });
         } else {
-            profileIcon.setImageResource(R.drawable.user); // Set default icon
+            profileIcon.setImageResource(R.drawable.user); // Default icon if no user logged in
         }
     }
+
 
     private void fetchLatestNews() {
         db.collection("posts")
                 .orderBy("postDate", Query.Direction.DESCENDING)
-                .limit(5) // Fetch latest 5 news for the banner
+                .limit(5)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
@@ -134,29 +158,25 @@ public class home extends AppCompatActivity {
                         }
                         latestNewsBannerAdapter.updateData(latestNews);
 
-                        // Capture the last document from this query for pagination of "older news"
                         if (!task.getResult().getDocuments().isEmpty()) {
                             lastDocumentOfLatestNews = task.getResult().getDocuments().get(task.getResult().size() - 1);
-                            fetchOlderNews(); // Only fetch older news if latest news were found
+                            fetchOlderNews();
                         } else {
-                            lastDocumentOfLatestNews = null; // No latest news, so no starting point for older news
-                            newsArticleAdapter.updateData(new ArrayList<>()); // Clear older news if no latest
+                            lastDocumentOfLatestNews = null;
+                            newsArticleAdapter.updateData(new ArrayList<>());
                             Toast.makeText(this, "No latest news found for banners.", Toast.LENGTH_SHORT).show();
-                            swipeRefreshLayout.setRefreshing(false); // Stop refreshing if nothing to load
+                            swipeRefreshLayout.setRefreshing(false);
                         }
                     } else {
-                        Log.e("home", "Error fetching latest news: " + task.getException().getMessage()); // Log the error
+                        Log.e(TAG, "Error fetching latest news: " + task.getException().getMessage());
                         Toast.makeText(this, "Error fetching latest news: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        swipeRefreshLayout.setRefreshing(false); // Stop refreshing on error
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
     }
 
     private void setupCategories() {
         List<Category> categories = new ArrayList<>();
-        // These icons should be added to your drawable folder (e.g., ic_category_business.xml)
-        // Ensure you have valid drawable resources for these categories.
-        // Using `R.drawable.user` as a placeholder as per your example. You should replace these.
         categories.add(new Category("Business", R.drawable.user));
         categories.add(new Category("Crime", R.drawable.user));
         categories.add(new Category("Editorials", R.drawable.user));
@@ -173,13 +193,12 @@ public class home extends AppCompatActivity {
         categories.add(new Category("Lifestyle", R.drawable.user));
         categories.add(new Category("Travel", R.drawable.user));
 
-        categoryAdapter.updateData(categories); // Update the category adapter with the list
+        categoryAdapter.updateData(categories);
     }
 
     private void onCategorySelected(Category category) {
         Toast.makeText(this, "Category selected: " + category.getName(), Toast.LENGTH_SHORT).show();
-        // Start CategoryNews activity and pass the selected category name
-        Intent intent = new Intent(home.this, CategoryNews.class); // Changed from CategoryNewsActivity to CategoryNews based on file structure
+        Intent intent = new Intent(home.this, CategoryNews.class);
         intent.putExtra(CategoryNews.EXTRA_CATEGORY_NAME, category.getName());
         startActivity(intent);
     }
@@ -188,16 +207,13 @@ public class home extends AppCompatActivity {
         Query query = db.collection("posts")
                 .orderBy("postDate", Query.Direction.DESCENDING);
 
-        // Use startAfter for pagination to get news older than the latest banner news
         if (lastDocumentOfLatestNews != null) {
             query = query.startAfter(lastDocumentOfLatestNews);
         } else {
-            // If no latest news were found, fetch the overall latest for older news (e.g., first 20 or 25)
-            // This case handles situations where there might be fewer than 5 total posts, or zero.
             Toast.makeText(this, "No specific starting point for older news, fetching overall latest.", Toast.LENGTH_SHORT).show();
         }
 
-        query.limit(25) // Fetch up to 25 older news articles as requested (changed from 20 to 25 as discussed previously)
+        query.limit(25)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
@@ -212,14 +228,13 @@ public class home extends AppCompatActivity {
                             Toast.makeText(this, "No news articles found in the database.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Log.e("home", "Error fetching older news: " + task.getException().getMessage()); // Log the error
+                        Log.e(TAG, "Error fetching older news: " + task.getException().getMessage());
                         Toast.makeText(this, "Error fetching older news: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                    swipeRefreshLayout.setRefreshing(false); // Always stop refreshing when all data is loaded or on error
+                    swipeRefreshLayout.setRefreshing(false);
                 });
     }
 
-    // Helper method to map a Firestore DocumentSnapshot to a NewsArticle object
     private NewsArticle mapDocumentToNewsArticle(DocumentSnapshot document) {
         String id = document.getId();
         String title = document.getString("title");
@@ -228,25 +243,27 @@ public class home extends AppCompatActivity {
         String imageUrl = document.getString("imageUrl");
         String author = document.getString("author");
 
-        // Ensure postDate is read as a String. Handle potential null.
         String postDate = document.getString("postDate");
         if (postDate == null) {
-            postDate = ""; // Default to empty string if field is missing
+            postDate = "";
         }
 
         String userId = document.getString("userId");
 
-        // Calling the correct 8-argument constructor for NewsArticle
         return new NewsArticle(id, title, description, imageUrl, postDate, category, author, userId);
     }
 
+    /**
+     * Callback method when a news article card is clicked.
+     * Navigates to the News activity for the selected article.
+     *
+     * @param newsArticle The NewsArticle object that was clicked.
+     */
     private void navigateToNewsDetail(NewsArticle newsArticle) {
-        // IMPORTANT: Assuming NewsDetailActivity is the correct class name for your news detail screen.
-        // If your detail screen is named something else (e.g., MainActivity as was in your previous code),
-        // please adjust this line accordingly. Based on common Android practices, a dedicated NewsDetailActivity
-        // is most appropriate for displaying a single news article's full content.
-        Intent intent = new Intent(this, MainActivity.class); // Corrected to NewsDetailActivity
-        intent.putExtra("newsArticle", newsArticle); // Pass the NewsArticle object (NewsArticle must be Parcelable/Serializable)
+        Intent intent = new Intent(this, news.class);
+        intent.putExtra("NEWS_ARTICLE_ID", newsArticle.getId());
         startActivity(intent);
+
+        Toast.makeText(this, "Opening article: " + newsArticle.getTitle(), Toast.LENGTH_SHORT).show();
     }
 }
