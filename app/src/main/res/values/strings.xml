@@ -5,4 +5,8 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_activity_together">together</string>
+    <string name="dev_info_name"><b>Name : </b><![CDATA[Nethmin Kavindu]]></string>
+    <string name="dev_info_student_no"><b>Student no : </b><![CDATA[2022t01576]]></string>
+    <string name="dev_info_personal_statement"><b>Personal statement : </b><![CDATA[I\'m a dedicated student developer focused on creating a platform for trustworthy and accessible news. In a world full of noise, my goal is to deliver clear, credible information that empowers readers. This project reflects my commitment to informed communities and responsible media.]]></string>
+    <string name="dev_info_release_version"><b> Release version : </b><![CDATA[ V 1.0 ]]></string>
 </resources>

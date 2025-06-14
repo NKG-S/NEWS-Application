@@ -54,7 +54,7 @@ public class UserInfo extends AppCompatActivity {
     // UI Elements
     private TextInputEditText usernameInput, addressInput, mobileInput, emailInput;
     private TextInputLayout usernameInputLayout, addressInputLayout, mobileInputLayout, emailInputLayout;
-    private Button editSaveButton, mainActionButton, writeNewPostButton; // Added writeNewPostButton
+    private Button editSaveButton, mainActionButton, writeNewPostButton, Dev_Info; // Added writeNewPostButton
     private ImageButton backButton, editProfilePictureButton;
     private CircleImageView profilePicture;
     private ProgressBar progressBar;
@@ -113,6 +113,7 @@ public class UserInfo extends AppCompatActivity {
         emailInputLayout = findViewById(R.id.emailInputLayout);
 
         editSaveButton = findViewById(R.id.editSaveButton);
+        Dev_Info = findViewById(R.id.devInfo);
         mainActionButton = findViewById(R.id.mainActionButton);
         writeNewPostButton = findViewById(R.id.WriteNewPost); // Initialize the new button
         backButton = findViewById(R.id.backButton);
@@ -175,7 +176,19 @@ public class UserInfo extends AppCompatActivity {
              Intent intent = new Intent(UserInfo.this, CreatePost.class);
              startActivity(intent);
         });
+
+
+        Dev_Info.setOnClickListener(v -> {
+            Toast.makeText(UserInfo.this, "Opening Developer Informations...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(UserInfo.this, DevInfo.class);
+            startActivity(intent);
+        });
     }
+
+
+
+
+
 
     /**
      * Fetches user data from Firebase Firestore and updates UI.
@@ -556,6 +569,8 @@ public class UserInfo extends AppCompatActivity {
             finish();
         }
     }
+
+
 
     @Override
     protected void onDestroy() {
