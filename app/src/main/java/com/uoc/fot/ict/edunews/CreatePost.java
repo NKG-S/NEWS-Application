@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log; // Added for logging
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -39,6 +40,7 @@ import java.util.UUID;
 public class CreatePost extends AppCompatActivity {
 
     private static final int PICK_IMAGE_REQUEST = 1;
+    private static final String TAG = "CreatePost"; // Added for logging
     private ImageButton backButton, pickImageButton, clearImageButton;
     private ShapeableImageView profileIcon;
     private TextInputEditText titleInput, descriptionInput;
@@ -59,7 +61,7 @@ public class CreatePost extends AppCompatActivity {
         initializeFirebase();
         initializeViews();
         setupListeners();
-        loadUserProfilePicture();
+        loadCurrentUserProfilePicture(); // Renamed to match the request
         setupCategoryDropdown();
         updateImageButtonsVisibility();
     }
@@ -107,18 +109,37 @@ public class CreatePost extends AppCompatActivity {
         }
     }
 
-    private void loadUserProfilePicture() {
+    // --- UPDATED FUNCTION START ---
+    private void loadCurrentUserProfilePicture() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null && currentUser.getPhotoUrl() != null) {
-            Glide.with(this)
-                    .load(currentUser.getPhotoUrl())
-                    .placeholder(R.drawable.user)
-                    .error(R.drawable.user)
-                    .into(profileIcon);
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            db.collection("users").document(userId).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String profilePictureUrl = documentSnapshot.getString("profilePictureUrl");
+                            if (profilePictureUrl != null && !profilePictureUrl.isEmpty()) {
+                                Glide.with(this)
+                                        .load(profilePictureUrl)
+                                        .placeholder(R.drawable.user) // Default user icon
+                                        .error(R.drawable.user)
+                                        .into(profileIcon); // Use profileIcon (ShapeableImageView) here
+                            } else {
+                                profileIcon.setImageResource(R.drawable.user); // Default icon if URL is null or empty
+                            }
+                        } else {
+                            profileIcon.setImageResource(R.drawable.user); // Default icon if user doc not found
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to load profile picture for top bar: " + e.getMessage());
+                        profileIcon.setImageResource(R.drawable.user); // Fallback to default icon on error
+                    });
         } else {
-            profileIcon.setImageResource(R.drawable.user);
+            profileIcon.setImageResource(R.drawable.user); // Default icon if no user logged in
         }
     }
+    // --- UPDATED FUNCTION END ---
 
     private void setupCategoryDropdown() {
         List<String> categories = Arrays.asList(
@@ -220,6 +241,9 @@ public class CreatePost extends AppCompatActivity {
         post.put("category", category);
         post.put("description", description);
         post.put("imageUrl", imageUrl);
+        // Note: You might want to fetch the author's display name from Firestore here too
+        // if it's stored separately from FirebaseAuth's displayName.
+        // For now, it uses user.getDisplayName() or "Anonymous".
         post.put("author", user.getDisplayName() != null ? user.getDisplayName() : "Anonymous");
         post.put("postDate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
         post.put("userId", user.getUid());

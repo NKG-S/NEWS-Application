@@ -193,7 +193,7 @@ public class UserInfo extends AppCompatActivity {
                         if (document.exists()) {
                             currentUsername = document.getString("username");
                             currentAddress = document.getString("address");
-                            currentMobile = document.getString("mobile");
+                            currentMobile = document.getString("mobileNumber");
                             currentEmail = currentUser.getEmail();
                             currentProfilePictureUrl = document.getString("profilePictureUrl");
                             // Retrieve author status

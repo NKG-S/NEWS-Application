@@ -6,23 +6,23 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/edu_news_logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/edu_news_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.EDUNews"
         tools:targetApi="31">
         <activity
             android:name=".CategoryNews"
             android:exported="false"
-            android:parentActivityName=".home"/>
+            android:parentActivityName=".home" />
         <activity
             android:name=".home"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".CreatePost"
-            android:parentActivityName=".home"
-            android:exported="false" />
+            android:exported="false"
+            android:parentActivityName=".home" />
         <activity
             android:name=".UserInfo"
             android:exported="false"

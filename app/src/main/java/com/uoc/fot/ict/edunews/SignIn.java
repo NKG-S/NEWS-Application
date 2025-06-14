@@ -63,10 +63,9 @@ public class SignIn extends AppCompatActivity {
 
         // Set onClickListener for Forgot Password text
         forgotPasswordButton.setOnClickListener(v -> {
-            // TODO: Navigate to Forgot Password activity
             Toast.makeText(SignIn.this, "Forgot Password clicked!", Toast.LENGTH_SHORT).show();
-            // Example: Intent intent = new Intent(SignIn.this, ForgotPasswordActivity.class);
-            // startActivity(intent);
+             Intent intent = new Intent(SignIn.this, FogotPassword.class);
+             startActivity(intent);
         });
 
         // Set onClickListener for Sign Up text
