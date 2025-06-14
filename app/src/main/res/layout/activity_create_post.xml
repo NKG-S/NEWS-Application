@@ -193,28 +193,27 @@
 
                 <FrameLayout
                     android:id="@+id/imagePickerContainer"
+                    android:background="#4B4B4B"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
-                    android:background="@drawable/image_placeholder_background"
                     android:padding="4dp">
 
                     <ImageView
                         android:id="@+id/postImagePreview"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/image_placeholder_background"
-                        android:contentDescription="Post Image Preview" />
+                        android:background="@android:color/white"
+                        android:contentDescription="Post Image Preview"
+                        android:scaleType="centerCrop" />
 
                     <ImageButton
                         android:id="@+id/pickImageButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:background="@android:color/white"
                         android:contentDescription="Pick Image"
-                        android:src="@drawable/add_icon"
-                        app:tint="@color/black" />
+                        android:src="@drawable/add_icon" />
                 </FrameLayout>
 
                 <ImageButton

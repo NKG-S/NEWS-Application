@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="2dp"
+    android:layout_marginRight="2dp"
+    android:background="@android:color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <ImageView
+        android:id="@+id/bannerImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="Latest News Banner"
+        android:scaleType="centerCrop"
+        android:src="@drawable/facebook" />
+
+    <TextView
+        android:id="@+id/bannerTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|left"
+        android:background="#80000000"
+        android:fontFamily="@font/montserrat_bold"
+        android:maxHeight="108dp"
+        android:padding="8dp"
+        android:text="World Art Day\nA work of art which did not begin in emotion is not art."
+        android:textColor="@color/white"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/articleDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginVertical="8dp"
+        android:fontFamily="@font/montserrat_bold"
+        android:text="17 Apr 2025"
+        android:textColor="@android:color/white"
+        android:textSize="12sp" />
+
+    <ImageView
+        android:id="@+id/bannerArrow"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="8dp"
+        android:contentDescription="Go to news"
+        android:src="@drawable/ic_arrow_right"
+        app:tint="@color/white" />
+
+</com.google.android.material.card.MaterialCardView>
