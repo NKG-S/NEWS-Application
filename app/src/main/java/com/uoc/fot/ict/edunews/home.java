@@ -177,19 +177,19 @@ public class home extends AppCompatActivity {
 
     private void setupCategories() {
         List<Category> categories = new ArrayList<>();
-        categories.add(new Category("Business", R.drawable.business));
-        categories.add(new Category("Crime", R.drawable.crime));
-        categories.add(new Category("Editorials", R.drawable.editorial));
-        categories.add(new Category("Political", R.drawable.political));
-        categories.add(new Category("Sports", R.drawable.sports));
-        categories.add(new Category("Social", R.drawable.social));
-        categories.add(new Category("International", R.drawable.international));
-        categories.add(new Category("Technology", R.drawable.technology));
-        categories.add(new Category("Health", R.drawable.health));
         categories.add(new Category("Education", R.drawable.education));
-        categories.add(new Category("Environment", R.drawable.environment));
-        categories.add(new Category("Art & Culture", R.drawable.art_and_culture));
+        categories.add(new Category("Sports", R.drawable.sports));
         categories.add(new Category("Science", R.drawable.science));
+        categories.add(new Category("Technology", R.drawable.technology));
+        categories.add(new Category("Art & Culture", R.drawable.art_and_culture));
+        categories.add(new Category("International", R.drawable.international));
+        categories.add(new Category("Health", R.drawable.health));
+        categories.add(new Category("Political", R.drawable.political));
+        categories.add(new Category("Business", R.drawable.business));
+        categories.add(new Category("Editorials", R.drawable.editorial));
+        categories.add(new Category("Social", R.drawable.social));
+        categories.add(new Category("Crime", R.drawable.crime));
+        categories.add(new Category("Environment", R.drawable.environment));
         categories.add(new Category("Lifestyle", R.drawable.life));
         categories.add(new Category("Travel", R.drawable.travel));
 

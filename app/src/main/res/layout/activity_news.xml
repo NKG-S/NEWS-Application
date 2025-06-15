@@ -37,9 +37,12 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:fontFamily="@font/montserrat_semibold"
-            android:text="World Art Day"
+            android:maxWidth="250dp"
+            android:maxHeight="45dp"
             android:textColor="@color/black"
-            android:textSize="20sp" />
+            android:gravity="center"
+            android:textSize="20sp"
+            tools:text="World Art Day" />
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/profileIcon"
@@ -76,9 +79,9 @@
                 android:fontFamily="@font/montserrat_bold"
                 android:textColor="@color/black"
                 android:textSize="24sp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="World Art Day" />
 
             <TextView
@@ -108,30 +111,24 @@
             <ImageView
                 android:id="@+id/newsArticleImage"
                 android:layout_width="match_parent"
-                android:layout_height="380dp"
-                android:layout_marginTop="16dp"
-                android:scaleType="centerCrop"
-                android:adjustViewBounds="true"
-                android:background="@drawable/circular_background_grey"
-                android:contentDescription="News Article Image"
+                android:layout_height="wrap_content" android:layout_marginTop="16dp"
+                android:adjustViewBounds="true" android:scaleType="fitCenter"   android:background="@drawable/circular_background_grey" android:contentDescription="News Article Image"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/newsArticleAuthor"
-                tools:src="@drawable/facebook" />
-
-            <TextView
-                android:id="@+id/newsArticleDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/montserrat"
-                android:lineSpacingExtra="4dp"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/newsArticleImage"
-                tools:text="Sample news article description. Sample news article description. Sample news article description. Sample news article description."/>
+                tools:src="@drawable/facebook" /> <TextView
+            android:id="@+id/newsArticleDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/montserrat"
+            android:lineSpacingExtra="4dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/newsArticleImage"
+            tools:text="Sample news article description. This is a longer description to demonstrate how the text wraps and displays within the allocated space below the image. The content should be easily readable for users." />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
