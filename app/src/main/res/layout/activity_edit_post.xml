@@ -44,12 +44,10 @@
 
         <ImageButton
             android:id="@+id/editOrCancelButton"
-            android:layout_width="56dp"
-            android:layout_height="62dp"
-            android:layout_alignParentTop="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginEnd="4dp"
+            android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Edit Post"
             android:src="@drawable/edit"
@@ -57,7 +55,6 @@
     </RelativeLayout>
 
     <ScrollView
-        android:id="@+id/scrollView2"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -96,11 +93,11 @@
                     android:id="@+id/TitleInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:enabled="false"
                     android:fontFamily="@font/montserrat"
                     android:inputType="textCapSentences"
                     android:textColor="@color/black"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:enabled="false" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -123,25 +120,28 @@
                 android:hint="Select category"
                 app:boxBackgroundColor="@color/white"
                 app:boxStrokeColor="@color/black"
-                app:endIconTint="@color/black"
-                app:hintTextColor="@android:color/darker_gray">
+                app:hintTextColor="@android:color/darker_gray"
+                app:endIconTint="@color/black">
 
                 <AutoCompleteTextView
                     android:id="@+id/CategoryInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/montserrat"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:enabled="false"
+                    android:dropDownSelector="@android:color/transparent"
+                    android:popupBackground="@color/white"
+                    android:dropDownVerticalOffset="4dp"
+                    android:dropDownHorizontalOffset="0dp"
                     android:background="@null"
                     android:cursorVisible="false"
-                    android:dropDownHorizontalOffset="0dp"
-                    android:dropDownVerticalOffset="4dp"
-                    android:dropDownSelector="@android:color/transparent"
-                    android:enabled="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:fontFamily="@font/montserrat"
-                    android:popupBackground="@color/white"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp" />
+                    android:clickable="false"
+                    android:inputType="none"
+                    android:longClickable="false"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -169,14 +169,14 @@
                     android:id="@+id/DescriptionInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:enabled="false"
                     android:fontFamily="@font/montserrat"
                     android:gravity="top"
                     android:inputType="textMultiLine"
-                    android:maxLines="10"
                     android:minLines="5"
+                    android:maxLines="10"
                     android:textColor="@color/black"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:enabled="false" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -233,8 +233,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Clear Image"
                     android:src="@drawable/cross"
-                    android:visibility="gone"
-                    app:tint="@color/black" />
+                    app:tint="@color/black"
+                    android:visibility="gone" />
 
             </LinearLayout>
 

@@ -280,44 +280,44 @@
 
                 <Button
                     android:id="@+id/WriteNewPost"
-                    android:layout_width="0dp"
-                    android:layout_height="55dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="0"
                     android:backgroundTint="@color/ButtonColour"
                     android:fontFamily="@font/montserrat_bold"
                     android:text="Write a new post"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:visibility="visible" />
 
                 <Button
                     android:id="@+id/MyPosts"
-                    android:layout_width="0dp"
-                    android:layout_height="55dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp"
                     android:layout_weight="1"
                     android:backgroundTint="@color/ButtonColour"
                     android:fontFamily="@font/montserrat_bold"
                     android:text="My Posts"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:visibility="visible" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/devInfo"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_height="55dp"
                 android:layout_marginTop="10dp"
                 android:backgroundTint="@color/ButtonColour"
-                android:visibility="visible"
                 android:fontFamily="@font/montserrat_bold"
                 android:text="Developer information"
                 android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="16sp"
+                android:textStyle="normal"
+                android:visibility="visible" />
 
         </LinearLayout>
     </ScrollView>

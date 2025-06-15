@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.android.material.imageview.ShapeableImageView; // Make sure this is imported
+import com.google.android.material.imageview.ShapeableImageView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,12 +34,13 @@ public class news extends AppCompatActivity {
 
     // UI Elements for Top Bar
     private TextView postTitleTextView; // Top bar title, will show article title
-    private ShapeableImageView profileIconImageView; // Top bar profile icon
+    private ShapeableImageView profileIconImageView; // Top bar profile icon (assuming it exists in XML)
     private ImageButton backButton; // Top bar back button
 
     // UI Elements for News Article Content
     private TextView newsArticleTitleTextView;
     private TextView newsArticleDateTimeTextView;
+    private TextView editedTextView; // New: TextView for "Edited" status
     private TextView newsArticleAuthorTextView;
     private ImageView newsArticleImageView; // The image view for the article
     private TextView newsArticleDescriptionTextView;
@@ -68,12 +69,14 @@ public class news extends AppCompatActivity {
         // Initialize UI elements by finding them from the layout
         // Top bar elements
         postTitleTextView = findViewById(R.id.postTitle); // Top bar title
+        // Ensure profileIconImageView exists in your layout, adding null check for safety
         profileIconImageView = findViewById(R.id.profileIcon); // Top bar profile icon
         backButton = findViewById(R.id.backButton); // Top bar back button
 
         // News article content elements
         newsArticleTitleTextView = findViewById(R.id.newsArticleTitle);
         newsArticleDateTimeTextView = findViewById(R.id.newsArticleDateTime);
+        editedTextView = findViewById(R.id.edited); // Initialize the new TextView
         newsArticleAuthorTextView = findViewById(R.id.newsArticleAuthor);
         newsArticleImageView = findViewById(R.id.newsArticleImage);
         newsArticleDescriptionTextView = findViewById(R.id.newsArticleDescription);
@@ -81,11 +84,15 @@ public class news extends AppCompatActivity {
 
         // Set up click listeners for the top bar buttons
         backButton.setOnClickListener(v -> onBackPressed()); // Go back when back button is clicked
-        profileIconImageView.setOnClickListener(v -> {
-            // Navigate to UserInfo activity when profile icon is clicked
-            Intent intent = new Intent(this, UserInfo.class);
-            startActivity(intent);
-        });
+        // Only set click listener if profileIconImageView is found in the layout
+        if (profileIconImageView != null) {
+            profileIconImageView.setOnClickListener(v -> {
+                // Navigate to UserInfo activity when profile icon is clicked
+                Intent intent = new Intent(this, UserInfo.class);
+                startActivity(intent);
+            });
+        }
+
 
         // Get news article ID from the intent that started this activity
         // This ID is crucial for fetching the correct news article data from Firestore
@@ -105,7 +112,7 @@ public class news extends AppCompatActivity {
 
     /**
      * Fetches the news article data from Firestore using the provided article ID.
-     * Populates the UI elements with the fetched data.
+     * Populates the UI elements with the fetched data, including handling for the "Edited" status.
      *
      * @param articleId The document ID of the news article in Firestore's "posts" collection.
      */
@@ -124,7 +131,8 @@ public class news extends AppCompatActivity {
                     String imageUrl = documentSnapshot.getString("imageUrl");
                     String postDate = documentSnapshot.getString("postDate");
                     String author = documentSnapshot.getString("author");
-                    String category = documentSnapshot.getString("category"); // Assuming category exists
+                    Boolean edited = documentSnapshot.getBoolean("edited"); // Retrieve 'edited' boolean
+                    String editDate = documentSnapshot.getString("editDate"); // Retrieve 'editDate' string
 
                     // Populate UI elements with fetched data
                     newsArticleTitleTextView.setText(title);
@@ -140,24 +148,40 @@ public class news extends AppCompatActivity {
                     // Format and display date and time
                     if (postDate != null && !postDate.isEmpty()) {
                         try {
-                            // Input format matching your Firestore timestamp string (e.g., "yyyy-MM-dd HH:mm:ss")
                             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                             Date date = inputFormat.parse(postDate);
-
-                            // Output formats for time and date
-                            SimpleDateFormat outputTimeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault()); // e.g., 12:44 PM
-                            SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy.MM.dd", Locale.getDefault()); // e.g., 2025.06.14
+                            SimpleDateFormat outputTimeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+                            SimpleDateFormat outputDateFormat = new SimpleDateFormat("yyyy.MM.dd", Locale.getDefault());
 
                             String formattedTime = outputTimeFormat.format(date);
                             String formattedDate = outputDateFormat.format(date);
                             newsArticleDateTimeTextView.setText(formattedTime + " | " + formattedDate);
                         } catch (ParseException e) {
-                            Log.e(TAG, "Error parsing date: " + postDate, e);
+                            Log.e(TAG, "Error parsing post date: " + postDate, e);
                             newsArticleDateTimeTextView.setText(postDate); // Fallback to raw date string on parse error
                         }
                     } else {
                         newsArticleDateTimeTextView.setText(""); // Clear if no date
                     }
+
+                    // Handle "Edited" status and display
+                    if (edited != null && edited && editDate != null && !editDate.isEmpty()) {
+                        try {
+                            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                            Date date = inputFormat.parse(editDate);
+                            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy.MM.dd | hh:mm a", Locale.getDefault());
+                            String formattedEditDate = outputFormat.format(date);
+                            editedTextView.setText("Edited: " + formattedEditDate);
+                            editedTextView.setVisibility(View.VISIBLE); // Make 'Edited' TextView visible
+                        } catch (ParseException e) {
+                            Log.e(TAG, "Error parsing edit date: " + editDate, e);
+                            editedTextView.setText("Edited"); // Fallback to just "Edited"
+                            editedTextView.setVisibility(View.VISIBLE); // Make 'Edited' TextView visible
+                        }
+                    } else {
+                        editedTextView.setVisibility(View.GONE); // Hide 'Edited' TextView if not edited or data is missing
+                    }
+
 
                     // Load image using Glide library
                     if (imageUrl != null && !imageUrl.isEmpty()) {

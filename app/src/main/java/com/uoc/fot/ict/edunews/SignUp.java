@@ -201,7 +201,7 @@ public class SignUp extends AppCompatActivity {
 
                                 Toast.makeText(SignUp.this, "Registration successful!", Toast.LENGTH_SHORT).show();
                                 // Navigate to the main activity or a welcome screen
-                                Intent intent = new Intent(SignUp.this, home.class);
+                                Intent intent = new Intent(SignUp.this, SignIn.class);
                                 startActivity(intent);
                                 finish(); // Prevent going back to SignUp
                             }
