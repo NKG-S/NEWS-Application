@@ -223,6 +223,7 @@
                         android:src="@drawable/add_icon"
                         android:visibility="gone" />
 
+
                 </FrameLayout>
 
                 <ImageButton

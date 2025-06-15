@@ -505,7 +505,6 @@ public class EditPost extends AppCompatActivity {
             deletePostDocumentFromFirestore();
         }
     }
-
     private void deletePostDocumentFromFirestore() {
         db.collection("posts").document(postId).delete()
                 .addOnSuccessListener(aVoid -> {
