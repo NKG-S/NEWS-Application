@@ -145,7 +145,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/newsArticleAuthor"
-                tools:src="@drawable/facebook" />
+                tools:src="@drawable/renew" />
 
             <!-- News Article Description -->
             <TextView

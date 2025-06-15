@@ -192,7 +192,7 @@ public class news extends AppCompatActivity {
                                 .into(newsArticleImageView);
                     } else {
                         // If no image URL, set a default image (e.g., a generic news icon or a placeholder)
-                        newsArticleImageView.setImageResource(R.drawable.facebook); // Replace with a suitable default
+                        newsArticleImageView.setImageResource(R.drawable.renew); // Replace with a suitable default
                     }
 
                     // Update top bar title to the news article's title
