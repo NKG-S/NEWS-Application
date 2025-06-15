@@ -13,6 +13,14 @@
         android:theme="@style/Theme.EDUNews"
         tools:targetApi="31">
         <activity
+            android:name=".EditPost"
+            android:exported="false"
+            android:parentActivityName=".MyPosts" />
+        <activity
+            android:name=".MyPosts"
+            android:exported="false"
+            android:parentActivityName=".UserInfo" />
+        <activity
             android:name=".CategoryNews"
             android:exported="false"
             android:parentActivityName=".home" />
@@ -63,7 +71,6 @@
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

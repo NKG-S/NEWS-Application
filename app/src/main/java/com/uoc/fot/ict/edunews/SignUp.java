@@ -180,7 +180,7 @@ public class SignUp extends AppCompatActivity {
             passwordInputLayout.setError("Password needs at least one special character.");
             return false;
         }
-        return true; // All password rules are met
+        return true; // All p;O?assword rules are met
     }
 
     private void registerUserInFirebase(String email, String password, String username, String address, String mobileNumber) {

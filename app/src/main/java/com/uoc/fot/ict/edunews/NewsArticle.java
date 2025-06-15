@@ -45,7 +45,7 @@ public class NewsArticle implements Parcelable {
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    public void setPostDate(String postDate) { this.postDate = postDate; } // Corrected typo
+    public void setPostDate(String postDate) { this.postDate = postDate; }
     public void setCategory(String category) { this.category = category; }
     public void setAuthor(String author) { this.author = author; }
     public void setUserId(String userId) { this.userId = userId; }

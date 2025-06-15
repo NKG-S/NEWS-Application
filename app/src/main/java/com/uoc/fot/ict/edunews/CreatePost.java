@@ -109,7 +109,6 @@ public class CreatePost extends AppCompatActivity {
         }
     }
 
-    // --- UPDATED FUNCTION START ---
     private void loadCurrentUserProfilePicture() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
@@ -139,7 +138,6 @@ public class CreatePost extends AppCompatActivity {
             profileIcon.setImageResource(R.drawable.user); // Default icon if no user logged in
         }
     }
-    // --- UPDATED FUNCTION END ---
 
     private void setupCategoryDropdown() {
         List<String> categories = Arrays.asList(
@@ -247,6 +245,8 @@ public class CreatePost extends AppCompatActivity {
         post.put("author", user.getDisplayName() != null ? user.getDisplayName() : "Anonymous");
         post.put("postDate", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
         post.put("userId", user.getUid());
+        post.put("edited", false); // Default value
+        post.put("editDate", ""); // Default empty string
 
         db.collection("posts")
                 .add(post)

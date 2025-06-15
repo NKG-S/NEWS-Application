@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout; // Import LinearLayout
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -53,11 +54,12 @@ public class UserInfo extends AppCompatActivity {
 
     // UI Elements
     private TextInputEditText usernameInput, addressInput, mobileInput, emailInput;
-    private TextInputLayout usernameInputLayout, addressInputLayout, mobileInputLayout, emailInputLayout;
-    private Button editSaveButton, mainActionButton, writeNewPostButton, Dev_Info; // Added writeNewPostButton
+    private TextInputLayout usernameInputLayout, addressInputLayout, mobileInputLayout;
+    private Button editSaveButton, mainActionButton, writeNewPostButton, myPostsButton, Dev_Info; // Added myPostsButton
     private ImageButton backButton, editProfilePictureButton;
     private CircleImageView profilePicture;
     private ProgressBar progressBar;
+    private LinearLayout authorButtonsLayout; // Added LinearLayout for author buttons
 
     // Firebase Instances
     private FirebaseAuth mAuth;
@@ -72,10 +74,10 @@ public class UserInfo extends AppCompatActivity {
     private String currentMobile;
     private String currentEmail;
     private String currentProfilePictureUrl;
-    private boolean isAuthor = false; // Added isAuthor flag
-    private Uri selectedImageUri; // For newly selected profile picture
+    private boolean isAuthor = false;
+    private Uri selectedImageUri;
 
-    private boolean isEditMode = false; // Initial state is view mode
+    private boolean isEditMode = false;
 
     // Activity Result Launcher for picking images
     private ActivityResultLauncher<Intent> pickImageLauncher;
@@ -88,7 +90,7 @@ public class UserInfo extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_info); // Assuming your layout file is user_info.xml
+        setContentView(R.layout.activity_user_info);
 
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
@@ -110,12 +112,14 @@ public class UserInfo extends AppCompatActivity {
         usernameInputLayout = findViewById(R.id.usernameInputLayout);
         addressInputLayout = findViewById(R.id.addressInputLayout);
         mobileInputLayout = findViewById(R.id.mobileInputLayout);
-        emailInputLayout = findViewById(R.id.emailInputLayout);
 
         editSaveButton = findViewById(R.id.editSaveButton);
         Dev_Info = findViewById(R.id.devInfo);
         mainActionButton = findViewById(R.id.mainActionButton);
-        writeNewPostButton = findViewById(R.id.WriteNewPost); // Initialize the new button
+        writeNewPostButton = findViewById(R.id.WriteNewPost);
+        myPostsButton = findViewById(R.id.MyPosts); // Initialize the new MyPosts button
+        authorButtonsLayout = findViewById(R.id.authorButtonsLayout); // Initialize the LinearLayout
+
         backButton = findViewById(R.id.backButton);
         profilePicture = findViewById(R.id.profilePicture);
         editProfilePictureButton = findViewById(R.id.editProfilePictureButton);
@@ -133,7 +137,7 @@ public class UserInfo extends AppCompatActivity {
                         }
                     } else {
                         Toast.makeText(this, "Image selection cancelled.", Toast.LENGTH_SHORT).show();
-                        selectedImageUri = null; // Clear selected image if cancelled
+                        selectedImageUri = null;
                     }
                 }
         );
@@ -156,7 +160,7 @@ public class UserInfo extends AppCompatActivity {
                 isEditMode = false;
                 displayUserData(false);
                 selectedImageUri = null;
-                updateAuthorButtonVisibility(); // Re-evaluate visibility after cancelling edit
+                // updateAuthorButtonVisibility() is called within displayUserData(false)
             } else {
                 signOutUser();
             }
@@ -170,11 +174,18 @@ public class UserInfo extends AppCompatActivity {
             }
         });
 
-        // Set listener for the new "Write A new post" button
+        // Set listener for "Write A new post" button
         writeNewPostButton.setOnClickListener(v -> {
             Toast.makeText(UserInfo.this, "Opening new post activity...", Toast.LENGTH_SHORT).show();
-             Intent intent = new Intent(UserInfo.this, CreatePost.class);
-             startActivity(intent);
+            Intent intent = new Intent(UserInfo.this, CreatePost.class);
+            startActivity(intent);
+        });
+
+        // Set listener for the new "My Posts" button
+        myPostsButton.setOnClickListener(v -> {
+            Toast.makeText(UserInfo.this, "Opening your posts...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(UserInfo.this, MyPosts.class); // Navigate to MyPosts activity
+            startActivity(intent);
         });
 
 
@@ -184,11 +195,6 @@ public class UserInfo extends AppCompatActivity {
             startActivity(intent);
         });
     }
-
-
-
-
-
 
     /**
      * Fetches user data from Firebase Firestore and updates UI.
@@ -214,8 +220,7 @@ public class UserInfo extends AppCompatActivity {
                             isAuthor = (authorStatus != null && authorStatus); // Default to false if not found/null
 
                             Log.d(TAG, "User data fetched: " + currentUsername + ", isAuthor: " + isAuthor);
-                            displayUserData(false);
-                            updateAuthorButtonVisibility(); // Update button visibility after data is fetched
+                            displayUserData(false); // Display in view mode initially
                         } else {
                             Log.d(TAG, "User data document does not exist, creating default.");
                             currentEmail = currentUser.getEmail();
@@ -229,7 +234,7 @@ public class UserInfo extends AppCompatActivity {
                             defaultUserData.put("username", currentUsername);
                             defaultUserData.put("email", currentEmail);
                             defaultUserData.put("address", currentAddress);
-                            defaultUserData.put("mobile", currentMobile);
+                            defaultUserData.put("mobileNumber", currentMobile); // Changed key to mobileNumber to match existing usage
                             defaultUserData.put("profilePictureUrl", currentProfilePictureUrl);
                             defaultUserData.put("author", isAuthor); // Add author field to default data
 
@@ -237,15 +242,13 @@ public class UserInfo extends AppCompatActivity {
                                     .addOnSuccessListener(aVoid -> Log.d(TAG, "Default user data created in Firestore."))
                                     .addOnFailureListener(e -> Log.e(TAG, "Error creating default user data", e));
 
-                            displayUserData(false);
-                            updateAuthorButtonVisibility(); // Update button visibility after default data set
+                            displayUserData(false); // Display in view mode
                         }
                     } else {
                         Log.e(TAG, "Failed to load user data from Firestore: ", task.getException());
                         Toast.makeText(UserInfo.this, "Failed to load user data: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                        currentEmail = currentUser.getEmail();
-                        displayUserData(false);
-                        updateAuthorButtonVisibility(); // Ensure button visibility is handled even on error
+                        currentEmail = currentUser.getEmail(); // Still try to get email from FirebaseAuth
+                        displayUserData(false); // Display in view mode even on error
                     }
                 }
             });
@@ -305,7 +308,8 @@ public class UserInfo extends AppCompatActivity {
             mobileInput.setTextColor(getResources().getColor(R.color.black, getTheme()));
             emailInput.setTextColor(getResources().getColor(R.color.black, getTheme()));
 
-            writeNewPostButton.setVisibility(View.GONE); // Hide "Write New Post" button when in edit mode
+            // Hide author-specific buttons when in edit mode
+            authorButtonsLayout.setVisibility(View.GONE);
 
         } else { // View Mode
             editSaveButton.setText("Edit");
@@ -323,7 +327,8 @@ public class UserInfo extends AppCompatActivity {
             mobileInput.setTextColor(Color.parseColor("#80000000"));
             emailInput.setTextColor(Color.parseColor("#80000000"));
 
-            updateAuthorButtonVisibility(); // Show "Write New Post" button based on isAuthor flag when in view mode
+            // Show author-specific buttons based on isAuthor flag when in view mode
+            updateAuthorButtonVisibility();
         }
     }
 
@@ -348,13 +353,14 @@ public class UserInfo extends AppCompatActivity {
     }
 
     /**
-     * Updates the visibility of the "Write A New Post" button based on the isAuthor flag.
+     * Updates the visibility of the "Write A New Post" and "My Posts" buttons
+     * based on the isAuthor flag and current edit mode.
      */
     private void updateAuthorButtonVisibility() {
         if (!isEditMode && isAuthor) {
-            writeNewPostButton.setVisibility(View.VISIBLE);
+            authorButtonsLayout.setVisibility(View.VISIBLE);
         } else {
-            writeNewPostButton.setVisibility(View.GONE);
+            authorButtonsLayout.setVisibility(View.GONE);
         }
     }
 
@@ -396,187 +402,107 @@ public class UserInfo extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         Toast.makeText(this, "Saving profile...", Toast.LENGTH_SHORT).show();
 
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
-            DocumentReference userRef = db.collection("users").document(userId);
-
-            Map<String, Object> userData = new HashMap<>();
-            userData.put("username", newUsername);
-            userData.put("address", newAddress);
-            userData.put("mobile", newMobile);
-
-            // Do not update 'author' status here as it's typically an admin-set permission.
-            // If you want users to be able to request author status, that's a different flow.
-
-            if (!newUsername.equals(currentUser.getDisplayName())) {
-                currentUser.updateProfile(new com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                                .setDisplayName(newUsername)
-                                .build())
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                Log.d(TAG, "Auth Profile display name updated.");
-                            } else {
-                                Log.e(TAG, "Failed to update Auth Profile display name.", task.getException());
-                            }
-                        });
-            }
-
-            userRef.update(userData)
-                    .addOnSuccessListener(aVoid -> {
-                        currentUsername = newUsername;
-                        currentAddress = newAddress;
-                        currentMobile = newMobile;
-
-                        if (selectedImageUri != null) {
-                            uploadProfilePicture(userId);
-                        } else {
-                            progressBar.setVisibility(View.GONE);
-                            Toast.makeText(UserInfo.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
-                            toggleEditMode();
-                            updateAuthorButtonVisibility(); // Re-evaluate visibility after saving
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(UserInfo.this, "Error updating profile data: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
-        }
-    }
-
-    /**
-     * Opens an image chooser intent to select a profile picture.
-     */
-    private void openImageChooser() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        pickImageLauncher.launch(intent);
-    }
-
-    /**
-     * Uploads the selected profile picture to Firebase Storage.
-     * Uses manual Bitmap scaling and compression.
-     */
-    private void uploadProfilePicture(String userId) {
-        if (selectedImageUri == null) {
-            Toast.makeText(this, "No image selected for upload.", Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.GONE);
-            toggleEditMode();
-            updateAuthorButtonVisibility(); // Re-evaluate visibility if upload is skipped
-            return;
-        }
-
-        progressBar.setVisibility(View.VISIBLE);
-        Toast.makeText(this, "Uploading image...", Toast.LENGTH_SHORT).show();
-
         executorService.execute(() -> {
             try {
-                // 1. Load the image as a Bitmap
-                Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
+                // Handle profile picture upload first if a new one is selected
+                if (selectedImageUri != null) {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 75, baos);
+                    byte[] data = baos.toByteArray();
 
-                // 2. Scale the Bitmap (e.g., to max 400x400, maintaining aspect ratio)
-                int originalWidth = originalBitmap.getWidth();
-                int originalHeight = originalBitmap.getHeight();
-                int newWidth = 400;
-                int newHeight = 400;
+                    StorageReference profilePicsRef = storageRef.child("profile_pictures/" + currentUser.getUid() + ".jpg");
 
-                if (originalWidth > newWidth || originalHeight > newHeight) {
-                    float ratio = Math.min((float) newWidth / originalWidth, (float) newHeight / originalHeight);
-                    newWidth = Math.round(ratio * originalWidth);
-                    newHeight = Math.round(ratio * originalHeight);
-                    originalBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true);
-                }
-
-                // 3. Compress the Bitmap into a ByteArrayOutputStream
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                originalBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos); // Compress with 80% quality
-                byte[] data = baos.toByteArray(); // Get the compressed byte array
-
-                // 4. Upload the compressed byte array to Firebase Storage
-                StorageReference profileImageRef = storageRef.child("profile_pictures/" + userId + ".jpg");
-
-                profileImageRef.putBytes(data) // Use putBytes instead of putFile
-                        .addOnSuccessListener(taskSnapshot -> {
-                            profileImageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    profilePicsRef.putBytes(data)
+                            .addOnSuccessListener(taskSnapshot -> profilePicsRef.getDownloadUrl().addOnSuccessListener(uri -> {
                                 currentProfilePictureUrl = uri.toString();
-                                Map<String, Object> profileUpdate = new HashMap<>();
-                                profileUpdate.put("profilePictureUrl", currentProfilePictureUrl);
-
-                                db.collection("users").document(userId).update(profileUpdate)
-                                        .addOnSuccessListener(aVoid -> handler.post(() -> {
-                                            Toast.makeText(UserInfo.this, "Profile picture uploaded and URL updated!", Toast.LENGTH_SHORT).show();
-                                            selectedImageUri = null; // Clear selected image
-                                            progressBar.setVisibility(View.GONE);
-                                            toggleEditMode(); // Switch back to view mode
-                                            updateAuthorButtonVisibility(); // Re-evaluate visibility after upload
-                                        }))
-                                        .addOnFailureListener(e -> handler.post(() -> {
-                                            Toast.makeText(UserInfo.this, "Failed to update profile picture URL in Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                            progressBar.setVisibility(View.GONE);
-                                            toggleEditMode();
-                                            updateAuthorButtonVisibility(); // Re-evaluate visibility after error
-                                        }));
+                                updateFirestoreUserData(newUsername, newAddress, newMobile, currentProfilePictureUrl);
+                            }).addOnFailureListener(e -> {
+                                handler.post(() -> {
+                                    progressBar.setVisibility(View.GONE);
+                                    Toast.makeText(UserInfo.this, "Failed to get new profile picture URL: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Log.e(TAG, "Error getting download URL", e);
+                                });
+                            }))
+                            .addOnFailureListener(e -> {
+                                handler.post(() -> {
+                                    progressBar.setVisibility(View.GONE);
+                                    Toast.makeText(UserInfo.this, "Failed to upload profile picture: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Log.e(TAG, "Error uploading profile picture", e);
+                                });
                             });
-                        })
-                        .addOnFailureListener(e -> handler.post(() -> {
-                            Toast.makeText(UserInfo.this, "Failed to upload profile picture: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                            progressBar.setVisibility(View.GONE);
-                            toggleEditMode();
-                            updateAuthorButtonVisibility(); // Re-evaluate visibility after error
-                        }));
-
+                } else {
+                    // If no new image selected, just update Firestore data
+                    updateFirestoreUserData(newUsername, newAddress, newMobile, currentProfilePictureUrl);
+                }
             } catch (IOException e) {
-                Log.e(TAG, "Error processing image: " + e.getMessage(), e);
+                Log.e(TAG, "Error processing image for upload", e);
                 handler.post(() -> {
-                    Toast.makeText(UserInfo.this, "Error processing image: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     progressBar.setVisibility(View.GONE);
-                    toggleEditMode();
-                    updateAuthorButtonVisibility(); // Re-evaluate visibility after error
+                    Toast.makeText(UserInfo.this, "Error processing image: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
             }
         });
     }
 
+    private void updateFirestoreUserData(String newUsername, String newAddress, String newMobile, String profilePictureUrl) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("username", newUsername);
+        updates.put("address", newAddress);
+        updates.put("mobileNumber", newMobile); // Ensure this matches Firestore field name
+        if (profilePictureUrl != null) {
+            updates.put("profilePictureUrl", profilePictureUrl);
+        }
+
+        db.collection("users").document(currentUser.getUid()).update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    currentUsername = newUsername;
+                    currentAddress = newAddress;
+                    currentMobile = newMobile;
+                    currentProfilePictureUrl = profilePictureUrl;
+                    handler.post(() -> {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(UserInfo.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                        isEditMode = false;
+                        displayUserData(false); // Switch back to view mode
+                        selectedImageUri = null; // Clear selected image
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    handler.post(() -> {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(UserInfo.this, "Error updating profile: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Error updating document", e);
+                    });
+                });
+    }
+
 
     /**
-     * Handles user sign out.
+     * Opens image chooser for selecting profile picture.
+     */
+    private void openImageChooser() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickImageLauncher.launch(intent);
+    }
+
+    /**
+     * Signs out the current user and navigates to the sign-in screen.
      */
     private void signOutUser() {
-        if (currentUser != null) {
-            mAuth.signOut();
-            Toast.makeText(this, "Signed out successfully.", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(UserInfo.this, SignIn.class); // Assuming SignIn is your login activity
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Clear back stack
-            startActivity(intent);
-            finish(); // Finish current activity
-        } else {
-            Toast.makeText(this, "No user to sign out.", Toast.LENGTH_SHORT).show();
-        }
+        mAuth.signOut();
+        Toast.makeText(this, "Signed out successfully.", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(UserInfo.this, SignIn.class); // Assuming SignIn is your login activity
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Clear back stack
+        startActivity(intent);
+        finish(); // Finish current activity
     }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if (isEditMode) {
-            Toast.makeText(this, "Changes discarded.", Toast.LENGTH_SHORT).show();
-            isEditMode = false;
-            displayUserData(false);
-            selectedImageUri = null;
-            updateAuthorButtonVisibility(); // Re-evaluate visibility after cancelling edit via back button
-        } else {
-            Intent intent = new Intent(UserInfo.this, home.class); // Assuming 'home.class' is your main activity
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
-        }
-    }
-
-
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (executorService != null && !executorService.isShutdown()) {
-            executorService.shutdownNow();
+        if (executorService != null) {
+            executorService.shutdownNow(); // Shut down the executor service
         }
     }
 }
