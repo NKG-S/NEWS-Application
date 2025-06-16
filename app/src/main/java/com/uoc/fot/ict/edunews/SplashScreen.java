@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log; // Added for logging
+import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -62,7 +62,7 @@ public class SplashScreen extends AppCompatActivity {
                 Log.d(TAG, "No Firebase user logged in. Proceeding to login/onboarding.");
                 handleFirstLaunchOrSignIn();
             }
-        }, 1500); // 1.5 second delay
+        }, 1000); // 1.5 second delay
     }
 
     /**

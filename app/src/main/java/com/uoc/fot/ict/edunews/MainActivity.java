@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -22,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private TextView welcomeText, nameText, emailText, addressText, mobileText;
-    private Button logoutButton, UserInfoButton, createPostButton;
+    private Button logoutButton;
+    private Button UserInfoButton;
     private ProgressBar progressBar;
 
     @Override
@@ -50,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         logoutButton = findViewById(R.id.logoutButton);
         progressBar = findViewById(R.id.progressBar);
         UserInfoButton = findViewById(R.id.UserInfoButton);
-        createPostButton = findViewById(R.id.createPostButton);
+        Button createPostButton = findViewById(R.id.createPostButton);
 
         logoutButton.setOnClickListener(v -> performLogout());
         UserInfoButton.setOnClickListener(v -> goToUserInfo());

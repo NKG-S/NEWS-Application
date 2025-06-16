@@ -33,7 +33,6 @@ public class home extends AppCompatActivity {
     private CategoryAdapter categoryAdapter;
     private NewsArticleAdapter newsArticleAdapter;
 
-    private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private FirebaseUser currentUser; // Added to store the current user
 
@@ -59,7 +58,7 @@ public class home extends AppCompatActivity {
     }
 
     private void initializeFirebase() {
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         currentUser = mAuth.getCurrentUser(); // Initialize currentUser here
     }
@@ -213,7 +212,7 @@ public class home extends AppCompatActivity {
             Toast.makeText(this, "No specific starting point for older news, fetching overall latest.", Toast.LENGTH_SHORT).show();
         }
 
-        query.limit(25)
+        query.limit(30)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {

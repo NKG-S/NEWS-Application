@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
     private List<Category> categoryList;
-    private Consumer<Category> onCategoryClick;
+    private final Consumer<Category> onCategoryClick;
 
     public CategoryAdapter(List<Category> categoryList, Consumer<Category> onCategoryClick) {
         this.categoryList = categoryList;

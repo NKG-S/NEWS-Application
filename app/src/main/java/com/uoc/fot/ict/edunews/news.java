@@ -16,12 +16,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.android.material.imageview.ShapeableImageView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,7 +35,6 @@ public class news extends AppCompatActivity {
     // UI Elements for Top Bar
     private TextView postTitleTextView; // Top bar title, will show article title
     private ShapeableImageView profileIconImageView; // Top bar profile icon (assuming it exists in XML)
-    private ImageButton backButton; // Top bar back button
 
     // UI Elements for News Article Content
     private TextView newsArticleTitleTextView;
@@ -46,14 +45,9 @@ public class news extends AppCompatActivity {
     private TextView newsArticleDescriptionTextView;
     private ProgressBar progressBar;
 
-    // Firebase Instances
-    private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
     // private FirebaseStorage storage; // Not strictly needed for just fetching URLs
-
-    // Data for the current news article
-    private String newsArticleId; // The ID of the news document to fetch
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +55,8 @@ public class news extends AppCompatActivity {
         setContentView(R.layout.activity_news); // Set the layout for this activity
 
         // Initialize Firebase instances
-        mAuth = FirebaseAuth.getInstance();
+        // Firebase Instances
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         currentUser = mAuth.getCurrentUser();
         // storage = FirebaseStorage.getInstance(); // Only if you need to manipulate storage
@@ -71,7 +66,8 @@ public class news extends AppCompatActivity {
         postTitleTextView = findViewById(R.id.postTitle); // Top bar title
         // Ensure profileIconImageView exists in your layout, adding null check for safety
         profileIconImageView = findViewById(R.id.profileIcon); // Top bar profile icon
-        backButton = findViewById(R.id.backButton); // Top bar back button
+        // Top bar back button
+        ImageButton backButton = findViewById(R.id.backButton); // Top bar back button
 
         // News article content elements
         newsArticleTitleTextView = findViewById(R.id.newsArticleTitle);
@@ -98,7 +94,9 @@ public class news extends AppCompatActivity {
         // This ID is crucial for fetching the correct news article data from Firestore
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra("NEWS_ARTICLE_ID")) {
-            newsArticleId = intent.getStringExtra("NEWS_ARTICLE_ID");
+            // Data for the current news article
+            // The ID of the news document to fetch
+            String newsArticleId = intent.getStringExtra("NEWS_ARTICLE_ID");
             fetchNewsArticle(newsArticleId); // Fetch the news article data
         } else {
             // If no article ID is provided, show a toast and close the activity

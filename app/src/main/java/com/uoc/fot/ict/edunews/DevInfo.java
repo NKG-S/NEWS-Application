@@ -8,8 +8,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -21,13 +21,8 @@ public class DevInfo extends AppCompatActivity {
 
     private static final String TAG = "DevInfoActivity";
 
-    private ImageButton backButton;
-    private TextView postTitleTextView;
     private ShapeableImageView profileIconImageView;
-    private Button exitButton;
 
-    // Firebase
-    private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
 
@@ -37,15 +32,16 @@ public class DevInfo extends AppCompatActivity {
         setContentView(R.layout.activity_dev_info);
 
         // Initialize Firebase
-        mAuth = FirebaseAuth.getInstance();
+        // Firebase
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         currentUser = mAuth.getCurrentUser();
 
         // Initialize UI components
-        backButton = findViewById(R.id.backButton);
-        postTitleTextView = findViewById(R.id.postTitle);
+        ImageButton backButton = findViewById(R.id.backButton);
+        TextView postTitleTextView = findViewById(R.id.postTitle);
         profileIconImageView = findViewById(R.id.profileIcon);
-        exitButton = findViewById(R.id.Exit);
+        Button exitButton = findViewById(R.id.Exit);
 
         // Set the post title
         postTitleTextView.setText("Developer information"); //

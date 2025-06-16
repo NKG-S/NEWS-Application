@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.util.Consumer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -16,12 +17,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import androidx.core.util.Consumer; // Using AndroidX Consumer for better compatibility
 
 public class NewsArticleAdapter extends RecyclerView.Adapter<NewsArticleAdapter.ArticleViewHolder> {
 
     private List<NewsArticle> newsArticleList;
-    private Consumer<NewsArticle> onArticleClick;
+    private final Consumer<NewsArticle> onArticleClick;
 
     /**
      * Constructor for the NewsArticleAdapter.

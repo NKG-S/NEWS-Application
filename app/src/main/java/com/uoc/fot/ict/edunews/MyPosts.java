@@ -11,7 +11,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,10 +33,6 @@ import java.util.Locale;
 
 public class MyPosts extends AppCompatActivity {
 
-    // UI Components
-    private TextView myPostsTitle;
-    private ImageButton backButton;
-    private ImageButton sortButton;
     private SearchView searchView;
     private RecyclerView myPostsRecyclerView;
     private NewsArticleAdapter newsArticleAdapter;
@@ -47,8 +42,8 @@ public class MyPosts extends AppCompatActivity {
     // Data and Firebase
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private List<NewsArticle> articlesList = new ArrayList<>();
-    private List<NewsArticle> filteredArticlesList = new ArrayList<>();
+    private final List<NewsArticle> articlesList = new ArrayList<>();
+    private final List<NewsArticle> filteredArticlesList = new ArrayList<>();
 
     // Enum to keep track of the current sort order for articles
     private SortOrder currentSortOrder = SortOrder.LATEST_TO_OLDEST;
@@ -65,9 +60,10 @@ public class MyPosts extends AppCompatActivity {
         setContentView(R.layout.activity_my_posts);
 
         // Initialize UI components
-        myPostsTitle = findViewById(R.id.myPostsTitle);
-        backButton = findViewById(R.id.backButton);
-        sortButton = findViewById(R.id.sortButton);
+        // UI Components
+        TextView myPostsTitle = findViewById(R.id.myPostsTitle);
+        ImageButton backButton = findViewById(R.id.backButton);
+        ImageButton sortButton = findViewById(R.id.sortButton);
         searchView = findViewById(R.id.searchView);
         myPostsRecyclerView = findViewById(R.id.myPostsRecyclerView);
         emptyStateText = findViewById(R.id.emptyStateText);

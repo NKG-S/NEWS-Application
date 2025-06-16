@@ -14,7 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout; // Import LinearLayout
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -55,8 +55,9 @@ public class UserInfo extends AppCompatActivity {
     // UI Elements
     private TextInputEditText usernameInput, addressInput, mobileInput, emailInput;
     private TextInputLayout usernameInputLayout, addressInputLayout, mobileInputLayout;
-    private Button editSaveButton, mainActionButton, writeNewPostButton, myPostsButton, Dev_Info; // Added myPostsButton
-    private ImageButton backButton, editProfilePictureButton;
+    private Button editSaveButton;
+    private Button mainActionButton;
+    private ImageButton editProfilePictureButton;
     private CircleImageView profilePicture;
     private ProgressBar progressBar;
     private LinearLayout authorButtonsLayout; // Added LinearLayout for author buttons
@@ -64,7 +65,6 @@ public class UserInfo extends AppCompatActivity {
     // Firebase Instances
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    private FirebaseStorage storage;
     private StorageReference storageRef;
     private FirebaseUser currentUser;
 
@@ -95,7 +95,7 @@ public class UserInfo extends AppCompatActivity {
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        storage = FirebaseStorage.getInstance();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
         currentUser = mAuth.getCurrentUser();
 
@@ -114,13 +114,14 @@ public class UserInfo extends AppCompatActivity {
         mobileInputLayout = findViewById(R.id.mobileInputLayout);
 
         editSaveButton = findViewById(R.id.editSaveButton);
-        Dev_Info = findViewById(R.id.devInfo);
+        // Added myPostsButton
+        Button dev_Info = findViewById(R.id.devInfo);
         mainActionButton = findViewById(R.id.mainActionButton);
-        writeNewPostButton = findViewById(R.id.WriteNewPost);
-        myPostsButton = findViewById(R.id.MyPosts); // Initialize the new MyPosts button
+        Button writeNewPostButton = findViewById(R.id.WriteNewPost);
+        Button myPostsButton = findViewById(R.id.MyPosts); // Initialize the new MyPosts button
         authorButtonsLayout = findViewById(R.id.authorButtonsLayout); // Initialize the LinearLayout
 
-        backButton = findViewById(R.id.backButton);
+        ImageButton backButton = findViewById(R.id.backButton);
         profilePicture = findViewById(R.id.profilePicture);
         editProfilePictureButton = findViewById(R.id.editProfilePictureButton);
         progressBar = findViewById(R.id.progressBar);
@@ -189,7 +190,7 @@ public class UserInfo extends AppCompatActivity {
         });
 
 
-        Dev_Info.setOnClickListener(v -> {
+        dev_Info.setOnClickListener(v -> {
             Toast.makeText(UserInfo.this, "Opening Developer Informations...", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(UserInfo.this, DevInfo.class);
             startActivity(intent);

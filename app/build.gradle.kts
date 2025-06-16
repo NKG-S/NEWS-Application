@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.compile.JavaCompile // ADD THIS LINE
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
@@ -30,6 +32,11 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    // UPDATED THIS BLOCK
+    tasks.withType<JavaCompile>().configureEach { // CHANGED: Added <JavaCompile> for explicit type
+        options.compilerArgs.add("-Xlint:deprecation")
     }
 
     buildFeatures {

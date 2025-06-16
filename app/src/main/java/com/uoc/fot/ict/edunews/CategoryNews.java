@@ -33,11 +33,6 @@ public class CategoryNews extends AppCompatActivity {
     // Key for passing the category name via Intent
     public static final String EXTRA_CATEGORY_NAME = "extra_category_name";
 
-    // UI Components
-    private TextView categoryNameTitle;
-    private ImageButton backButton;
-    private ImageButton sortButton;
-    private RecyclerView categoryNewsRecyclerView;
     private NewsArticleAdapter newsArticleAdapter; // Reusing your existing adapter for news cards
     private TextView emptyStateText;
     private ProgressBar progressBar;
@@ -45,7 +40,7 @@ public class CategoryNews extends AppCompatActivity {
     // Data and Firebase
     private String currentCategory;
     private FirebaseFirestore db;
-    private List<NewsArticle> articlesList = new ArrayList<>();
+    private final List<NewsArticle> articlesList = new ArrayList<>();
 
     // Enum to keep track of the current sort order for articles
     private SortOrder currentSortOrder = SortOrder.LATEST_TO_OLDEST;
@@ -62,10 +57,11 @@ public class CategoryNews extends AppCompatActivity {
         setContentView(R.layout.activity_category_news); // Set the layout for this activity
 
         // Initialize UI components by finding them by their IDs from the layout
-        categoryNameTitle = findViewById(R.id.categoryNameTitle);
-        backButton = findViewById(R.id.backButton);
-        sortButton = findViewById(R.id.sortButton);
-        categoryNewsRecyclerView = findViewById(R.id.categoryNewsRecyclerView);
+        // UI Components
+        TextView categoryNameTitle = findViewById(R.id.categoryNameTitle);
+        ImageButton backButton = findViewById(R.id.backButton);
+        ImageButton sortButton = findViewById(R.id.sortButton);
+        RecyclerView categoryNewsRecyclerView = findViewById(R.id.categoryNewsRecyclerView);
         emptyStateText = findViewById(R.id.emptyStateText);
         progressBar = findViewById(R.id.progressBar);
 
