@@ -173,10 +173,11 @@ public class UserInfo extends AppCompatActivity {
                     displayUserData(false);
                     selectedImageUri = null;
                 } else {
+                    // Navigate to home, then clear back stack to prevent returning to UserInfo
                     Intent intent = new Intent(UserInfo.this, home.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(intent);
-                    finish();
+                    finish(); // Finish current UserInfo activity
                 }
             }
         };
@@ -296,6 +297,7 @@ public class UserInfo extends AppCompatActivity {
         } else {
             Log.d(TAG, "No current user, redirecting to SignIn.");
             Toast.makeText(this, "User not logged in. Please sign in.", Toast.LENGTH_SHORT).show();
+            // Original navigation for unauthenticated users, which correctly goes to SignIn
             Intent intent = new Intent(UserInfo.this, SignIn.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
@@ -555,10 +557,11 @@ public class UserInfo extends AppCompatActivity {
     private void signOutUser() {
         mAuth.signOut();
         Toast.makeText(this, "Signed out successfully.", Toast.LENGTH_SHORT).show();
+        // Use FLAG_ACTIVITY_NEW_TASK and FLAG_ACTIVITY_CLEAR_TASK to clear all other activities
         Intent intent = new Intent(UserInfo.this, SignIn.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish();
+        finish(); // Finish current activity
     }
 
     /**
@@ -567,20 +570,18 @@ public class UserInfo extends AppCompatActivity {
     private void confirmDeleteAccount() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete Account");
-        // Removed the duplicate message
         builder.setMessage("Are you sure you want to delete your account?\nThis action is irreversible.");
 
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_delete_account, null);
         CheckBox deletePostsCheckbox = dialogView.findViewById(R.id.deletePostsCheckbox);
-        TextView deletePostsTextView = dialogView.findViewById(R.id.deletePostsTextView); // Corrected ID usage
-        LinearLayout deletePostsOptionLayout = dialogView.findViewById(R.id.deletePostsOptionLayout); // Get reference to parent layout
+        TextView deletePostsTextView = dialogView.findViewById(R.id.deletePostsTextView);
+        LinearLayout deletePostsOptionLayout = dialogView.findViewById(R.id.deletePostsOptionLayout);
 
         if (isAuthor) {
-            deletePostsOptionLayout.setVisibility(View.VISIBLE); // Show the entire LinearLayout
-            // No need to set individual checkbox/text visibility if parent is handled
+            deletePostsOptionLayout.setVisibility(View.VISIBLE);
         } else {
-            deletePostsOptionLayout.setVisibility(View.GONE); // Hide the entire LinearLayout
+            deletePostsOptionLayout.setVisibility(View.GONE);
         }
 
         builder.setView(dialogView);
@@ -600,6 +601,7 @@ public class UserInfo extends AppCompatActivity {
     private void executeAccountDeletion(boolean deletePosts) {
         if (currentUser == null) {
             Toast.makeText(this, "No user logged in to delete.", Toast.LENGTH_SHORT).show();
+            // Ensure proper navigation even if currentUser becomes null unexpectedly mid-process
             signOutAndNavigateToSignIn();
             return;
         }
@@ -630,6 +632,7 @@ public class UserInfo extends AppCompatActivity {
     private void handleDeletionFailure(String message, Exception e) {
         handler.post(() -> {
             progressBar.setVisibility(View.GONE);
+            // Re-enable buttons only if deletion process did NOT complete fully
             editSaveButton.setEnabled(true);
             mainActionButton.setEnabled(true);
             if (deleteAccountButton != null) deleteAccountButton.setEnabled(true);
@@ -653,14 +656,14 @@ public class UserInfo extends AppCompatActivity {
                         })
                         .addOnFailureListener(e -> {
                             Log.e(TAG, "Failed to delete profile picture: " + e.getMessage());
-                            onComplete.run();
+                            onComplete.run(); // Continue even if profile picture deletion fails
                         });
             } catch (IllegalArgumentException e) {
                 Log.w(TAG, "Profile picture URL is not a valid Firebase Storage URL. Skipping deletion. Error: " + e.getMessage());
                 onComplete.run();
             }
         } else {
-            onComplete.run();
+            onComplete.run(); // No profile picture to delete
         }
     }
 
@@ -670,7 +673,7 @@ public class UserInfo extends AppCompatActivity {
      * @param onComplete Callback to run after post deletion attempts.
      */
     private void deleteUserPostsAndImages(boolean deletePosts, Runnable onComplete) {
-        if (isAuthor && deletePosts && currentUser != null) { // Only proceed if author and deletePosts is true
+        if (isAuthor && deletePosts && currentUser != null) {
             db.collection("posts")
                     .whereEqualTo("userId", currentUser.getUid())
                     .get()
@@ -690,6 +693,7 @@ public class UserInfo extends AppCompatActivity {
                                 deletionTasks.add(doc.getReference().delete().addOnFailureListener(e -> Log.e(TAG, "Failed to delete post document " + doc.getId() + ": " + e.getMessage())));
                             }
 
+                            // Wait for all individual post/image deletions to complete
                             Tasks.whenAll(deletionTasks)
                                     .addOnCompleteListener(allTasks -> {
                                         if (allTasks.isSuccessful()) {
@@ -697,11 +701,11 @@ public class UserInfo extends AppCompatActivity {
                                         } else {
                                             Log.e(TAG, "Some post/image deletions failed during user account deletion for author " + currentUser.getUid());
                                         }
-                                        onComplete.run();
+                                        onComplete.run(); // Continue regardless of individual post deletion success
                                     });
                         } else {
                             Log.e(TAG, "Failed to fetch user's posts for deletion: " + task.getException());
-                            onComplete.run();
+                            onComplete.run(); // Continue even if fetching posts fails
                         }
                     });
         } else {
@@ -722,10 +726,10 @@ public class UserInfo extends AppCompatActivity {
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Failed to delete user document: " + e.getMessage());
-                        onComplete.run();
+                        onComplete.run(); // Proceed to delete auth account even if document deletion fails
                     });
         } else {
-            onComplete.run();
+            onComplete.run(); // No user document to delete
         }
     }
 
@@ -740,15 +744,17 @@ public class UserInfo extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                             if (task.isSuccessful()) {
                                 Toast.makeText(UserInfo.this, "Account deleted successfully.", Toast.LENGTH_SHORT).show();
+                                // THIS IS THE CRUCIAL CHANGE: Ensure the back stack is cleared completely
                                 signOutAndNavigateToSignIn();
                             } else {
                                 if (task.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
                                     Toast.makeText(UserInfo.this, "For security, please sign out and sign in again, then re-attempt account deletion.", Toast.LENGTH_LONG).show();
                                     Log.w(TAG, "Re-authentication required for account deletion.");
-                                    signOutAndNavigateToSignIn();
+                                    signOutAndNavigateToSignIn(); // Force re-login, which clears stack
                                 } else {
                                     Toast.makeText(UserInfo.this, "Failed to delete account: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
                                     Log.e(TAG, "Error deleting Firebase Auth account", task.getException());
+                                    // Re-enable buttons if auth deletion fails
                                     editSaveButton.setEnabled(true);
                                     mainActionButton.setEnabled(true);
                                     if (deleteAccountButton != null) deleteAccountButton.setEnabled(true);
@@ -757,21 +763,23 @@ public class UserInfo extends AppCompatActivity {
                         });
                     });
         } else {
+            // If currentUser is null here, it means we're already in a bad state, just try to go to SignIn
             signOutAndNavigateToSignIn();
         }
     }
 
     /**
-     * Helper method to sign out and navigate to the SignIn screen.
+     * Helper method to sign out and navigate to the SignIn screen, clearing the activity stack.
      */
     private void signOutAndNavigateToSignIn() {
-        if (mAuth.getCurrentUser() != null) {
+        if (mAuth.getCurrentUser() != null) { // Only sign out if someone is actually signed in
             mAuth.signOut();
         }
         Intent intent = new Intent(UserInfo.this, SignIn.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Use FLAG_ACTIVITY_NEW_TASK and FLAG_ACTIVITY_CLEAR_TASK to ensure SignIn is the only activity on stack
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        finish();
+        finish(); // Finish current activity (UserInfo)
     }
 
     @Override
@@ -780,6 +788,7 @@ public class UserInfo extends AppCompatActivity {
         if (executorService != null) {
             executorService.shutdownNow();
         }
+        // Remove the callback to prevent leaks if not already removed by `finish()`
         if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();
         }
