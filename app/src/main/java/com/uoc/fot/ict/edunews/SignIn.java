@@ -25,7 +25,7 @@ import java.util.Objects;
 
 public class SignIn extends AppCompatActivity {
 
-    private static final String TAG = "SignIn"; // Tag for logging
+    private static final String TAG = "SignInActivity"; // Consistent tag for logging
 
     // Firebase instance
     private FirebaseAuth mAuth;
@@ -34,7 +34,7 @@ public class SignIn extends AppCompatActivity {
     private TextInputEditText emailInput, passwordInput;
     private TextInputLayout emailInputLayout, passwordInputLayout; // For displaying errors
     private Button loginButton;
-    private TextView forgotPasswordButton, signUpText; // Renamed to match XML IDs
+    private TextView forgotPasswordButton, signUpText;
     private ProgressBar progressBar;
 
     @Override
@@ -54,41 +54,61 @@ public class SignIn extends AppCompatActivity {
         passwordInputLayout = findViewById(R.id.passwordInputLayout);
 
         loginButton = findViewById(R.id.Loginbutton);
-        forgotPasswordButton = findViewById(R.id.ForgotPasswordButton); // Matches XML ID
-        signUpText = findViewById(R.id.SignUpTXT); // Matches XML ID
-        progressBar = findViewById(R.id.progressBar); // Initialize the progress bar
+        forgotPasswordButton = findViewById(R.id.ForgotPasswordButton);
+        signUpText = findViewById(R.id.SignUpTXT);
+        progressBar = findViewById(R.id.progressBar);
 
         // Set onClickListener for the login button
         loginButton.setOnClickListener(v -> attemptLogin());
 
         // Set onClickListener for Forgot Password text
         forgotPasswordButton.setOnClickListener(v -> {
-            Toast.makeText(SignIn.this, "Forgot Password clicked!", Toast.LENGTH_SHORT).show();
-             Intent intent = new Intent(SignIn.this, FogotPassword.class);
-             startActivity(intent);
+            Intent intent = new Intent(SignIn.this, FogotPassword.class); // Corrected to FogotPassword
+            startActivity(intent);
         });
 
         // Set onClickListener for Sign Up text
         signUpText.setOnClickListener(v -> {
-            Intent intent = new Intent(SignIn.this, SignUp.class); // Assuming SignUp.class is your registration activity
+            Intent intent = new Intent(SignIn.this, SignUp.class);
             startActivity(intent);
             // No finish() here, so user can go back to SignIn from SignUp if they change their mind
         });
     }
 
-    // This method is called when the activity starts (or resumes)
-    // It's a good place to check if a user is already signed in
+    /**
+     * This method is called when the activity starts (or resumes).
+     * It's crucial for checking if a user is already signed in and their email is verified.
+     */
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            Log.d(TAG, "User already signed in: " + currentUser.getEmail());
-            navigateToHome();
+            Log.d(TAG, "User already signed in. Checking email verification status...");
+            // Reload user to get fresh verification status in case they verified outside the app
+            currentUser.reload().addOnCompleteListener(reloadTask -> {
+                if (reloadTask.isSuccessful() && currentUser.isEmailVerified()) {
+                    Log.d(TAG, "User is authenticated and email verified. Redirecting to home.");
+                    navigateToHome(); // Navigate to home if verified
+                } else if (reloadTask.isSuccessful() && !currentUser.isEmailVerified()) {
+                    // User is logged in but not verified. Keep them on SignIn page.
+                    Log.d(TAG, "User logged in but email not verified. Keeping on SignIn screen.");
+                    Toast.makeText(SignIn.this, "Please verify your email to continue. Check your inbox for a verification link.", Toast.LENGTH_LONG).show();
+                    // Optionally sign them out to force re-login and re-check, or prevent further action
+                    mAuth.signOut(); // Sign out unverified user from previous session
+                } else {
+                    Log.w(TAG, "Failed to reload user status, keeping on SignIn.", reloadTask.getException());
+                    // Fallback: If reload fails, assume not verified or issue, let them try to sign in
+                }
+            });
+        } else {
+            Log.d(TAG, "No user signed in.");
         }
     }
 
+    /**
+     * Attempts to log in the user after validating email and password fields.
+     */
     private void attemptLogin() {
         // Reset errors
         emailInputLayout.setError(null);
@@ -123,6 +143,10 @@ public class SignIn extends AppCompatActivity {
         }
     }
 
+    /**
+     * Authenticates the user with Firebase using provided email and password.
+     * Includes email verification check.
+     */
     private void loginUserWithFirebase(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -131,17 +155,57 @@ public class SignIn extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE); // Hide progress bar
 
                         if (task.isSuccessful()) {
-                            // Sign in success
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(SignIn.this, "Login successful! Welcome.", Toast.LENGTH_SHORT).show();
-                            navigateToHome();
+
+                            if (user != null) {
+                                // Reload user to get the most up-to-date verification status
+                                user.reload().addOnCompleteListener(reloadTask -> {
+                                    if (reloadTask.isSuccessful() && user.isEmailVerified()) {
+                                        Toast.makeText(SignIn.this, "Login successful! Welcome.", Toast.LENGTH_SHORT).show();
+                                        navigateToHome(); // Only navigate to home if email is verified
+                                    } else if (reloadTask.isSuccessful() && !user.isEmailVerified()) {
+                                        // User logged in, but email is not verified
+                                        Toast.makeText(SignIn.this, "Please verify your email address to continue. A verification link has been sent to " + user.getEmail() + ".", Toast.LENGTH_LONG).show();
+                                        // Sign out the user to prevent them from accessing unverified content
+                                        mAuth.signOut();
+                                        // Optionally, resend verification email
+                                        user.sendEmailVerification()
+                                                .addOnCompleteListener(resendTask -> {
+                                                    if (resendTask.isSuccessful()) {
+                                                        Log.d(TAG, "Verification email resent successfully.");
+                                                        Toast.makeText(SignIn.this, "Verification email resent.", Toast.LENGTH_SHORT).show();
+                                                    } else {
+                                                        Log.e(TAG, "Failed to resend verification email.", resendTask.getException());
+                                                    }
+                                                });
+                                    } else {
+                                        // Failed to reload user, treat as unverified for safety
+                                        Toast.makeText(SignIn.this, "Authentication successful, but unable to verify email status. Please try again or check your internet connection.", Toast.LENGTH_LONG).show();
+                                        mAuth.signOut(); // Sign out for safety
+                                    }
+                                });
+                            } else {
+                                // This case should ideally not happen if task is successful but user is null
+                                Toast.makeText(SignIn.this, "Authentication failed. User data unavailable.", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            String errorMessage = "Authentication failed.";
+                            String errorMessage = "Authentication failed. ";
                             if (task.getException() != null) {
-                                errorMessage += " " + task.getException().getMessage();
+                                errorMessage += task.getException().getMessage();
+                                // Provide more user-friendly messages for common errors
+                                if (task.getException().getMessage().contains("badly formatted")) {
+                                    emailInputLayout.setError("Invalid email format.");
+                                    errorMessage = "Invalid email format.";
+                                } else if (task.getException().getMessage().contains("password")) {
+                                    passwordInputLayout.setError("Incorrect password.");
+                                    errorMessage = "Incorrect password or email.";
+                                } else if (task.getException().getMessage().contains("no user record")) {
+                                    emailInputLayout.setError("No account found with this email.");
+                                    errorMessage = "No account found with this email.";
+                                }
                             }
                             Toast.makeText(SignIn.this, errorMessage, Toast.LENGTH_LONG).show();
                         }
@@ -149,8 +213,15 @@ public class SignIn extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Navigates to the home activity and clears the activity stack.
+     */
     private void navigateToHome() {
         Intent intent = new Intent(SignIn.this, home.class);
+        // FLAG_ACTIVITY_NEW_TASK: Starts activity in a new task.
+        // FLAG_ACTIVITY_CLEAR_TASK: Clears any existing task that would hold the new activity.
+        // Together, these ensure 'home' is the only activity on the stack, preventing back navigation to SignIn/SignUp.
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish(); // Finish the SignIn activity so user can't go back to it after successful login
     }

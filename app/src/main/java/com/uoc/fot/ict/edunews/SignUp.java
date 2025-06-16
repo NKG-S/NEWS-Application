@@ -74,8 +74,11 @@ public class SignUp extends AppCompatActivity {
 
         signInText.setOnClickListener(v -> {
             Intent intent = new Intent(SignUp.this, SignIn.class);
+            // Use FLAG_ACTIVITY_CLEAR_TOP and FLAG_ACTIVITY_NEW_TASK
+            // to clear SignUp activity from the stack when going to SignIn
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            finish();
+            finish(); // Finish SignUp activity
         });
     }
 
@@ -114,24 +117,19 @@ public class SignUp extends AppCompatActivity {
             Toast.makeText(this, "Mobile Number is required.", Toast.LENGTH_SHORT).show();
             cancel = true;
         } else {
+            // Regex for +94xxxxxxxxxx (12 chars including +)
+            // Regex for 07xxxxxxxx (10 chars including 0)
             if (mobileNumber.startsWith("+94")) {
-                if (mobileNumber.length() != 12) {
+                // Corrected regex: \\+94\\d{9} for +94 followed by 9 digits
+                if (mobileNumber.length() != 12 || !Pattern.matches("\\+94\\d{9}", mobileNumber)) {
                     mobileNumberInputLayout.setError("Mobile number starting with '+94' must be 12 characters long (e.g., +94712345678).");
-                    Toast.makeText(this, "Mobile number starting with '+94' must be 12 characters long.", Toast.LENGTH_LONG).show();
-                    cancel = true;
-                } else if (!Pattern.matches("\\+\\d{12}", mobileNumber)) {
-                    mobileNumberInputLayout.setError("Please enter a valid 12-character mobile number starting with Country code.");
-                    Toast.makeText(this, "Invalid mobile number format with Country code", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Invalid mobile number format with Country code. Expected: +94xxxxxxxxx", Toast.LENGTH_LONG).show();
                     cancel = true;
                 }
             } else if (mobileNumber.startsWith("07")) {
-                if (mobileNumber.length() != 10) {
+                if (mobileNumber.length() != 10 || !Pattern.matches("07\\d{8}", mobileNumber)) {
                     mobileNumberInputLayout.setError("Mobile number starting with '07' must be 10 characters long.");
-                    Toast.makeText(this, "Mobile number starting with '07' must be 10 characters long.", Toast.LENGTH_LONG).show();
-                    cancel = true;
-                } else if (!Pattern.matches("07\\d{8}", mobileNumber)) {
-                    mobileNumberInputLayout.setError("Please enter a valid 10-digit mobile number starting with '07'.");
-                    Toast.makeText(this, "Invalid mobile number format for 07.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Invalid mobile number format for 07. Expected: 07xxxxxxxxx", Toast.LENGTH_LONG).show();
                     cancel = true;
                 }
             } else {
@@ -250,8 +248,10 @@ public class SignUp extends AppCompatActivity {
                                                 saveUserDataToFirestore(user.getUid(), username, address, mobileNumber, email, DEFAULT_COUNTRY);
                                                 // Navigate to SignIn activity, user needs to verify email first
                                                 Intent intent = new Intent(SignUp.this, SignIn.class);
+                                                // Ensure SignUp is cleared from the back stack to prevent going back to it from SignIn
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                 startActivity(intent);
-                                                finish(); // Prevent going back to SignUp
+                                                finish(); // Finish SignUp activity
                                             } else {
                                                 Log.e(TAG, "Failed to send verification email.", task1.getException());
                                                 Toast.makeText(SignUp.this, "Registration successful, but failed to send verification email. Please try signing in later or contact support.", Toast.LENGTH_LONG).show();
@@ -259,8 +259,9 @@ public class SignUp extends AppCompatActivity {
                                                 saveUserDataToFirestore(user.getUid(), username, address, mobileNumber, email, DEFAULT_COUNTRY);
                                                 // Still navigate to SignIn, as the account exists
                                                 Intent intent = new Intent(SignUp.this, SignIn.class);
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                 startActivity(intent);
-                                                finish();
+                                                finish(); // Finish SignUp activity
                                             }
                                         });
 
