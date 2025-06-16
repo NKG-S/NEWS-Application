@@ -19,6 +19,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,29 +31,27 @@ import java.util.regex.Pattern;
 
 public class SignUp extends AppCompatActivity {
 
-    private static final String TAG = "SignUpActivity"; // Tag for logging
+    private static final String TAG = "SignUpActivity";
 
-    // Firebase instances
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db; // Firebase Firestore instance
+    private FirebaseFirestore db;
 
-    // UI elements
     private TextInputEditText usernameInput, addressInput, mobileNumberInput, emailInput, passwordInput, confirmPasswordInput;
     private TextInputLayout usernameInputLayout, addressInputLayout, mobileNumberInputLayout, emailInputLayout, passwordInputLayout, confirmPasswordInputLayout;
     private Button registerButton;
     private TextView signInText;
     private ProgressBar progressBar;
 
+    private static final String DEFAULT_COUNTRY = "Sri Lanka";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        // Initialize Firebase instances
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance(); // Initialize Cloud Firestore
+        db = FirebaseFirestore.getInstance();
 
-        // Initialize TextInputEditText views
         usernameInput = findViewById(R.id.UsernameInput);
         addressInput = findViewById(R.id.AddressInput);
         mobileNumberInput = findViewById(R.id.MobileNumberInput);
@@ -60,7 +59,6 @@ public class SignUp extends AppCompatActivity {
         passwordInput = findViewById(R.id.PasswordInput);
         confirmPasswordInput = findViewById(R.id.ConfirmPasswordInput);
 
-        // Initialize TextInputLayout views to set errors directly
         usernameInputLayout = findViewById(R.id.usernameInputLayout);
         addressInputLayout = findViewById(R.id.AddressInputLayout);
         mobileNumberInputLayout = findViewById(R.id.MobileNumberInputLayout);
@@ -70,16 +68,14 @@ public class SignUp extends AppCompatActivity {
 
         registerButton = findViewById(R.id.RegisterButton);
         signInText = findViewById(R.id.SignInTXT);
-        progressBar = findViewById(R.id.progressBar); // Initialize the progress bar
+        progressBar = findViewById(R.id.progressBar);
 
-        // Set click listener for register button
         registerButton.setOnClickListener(v -> attemptRegistration());
 
-        // Set click listener for sign in text
         signInText.setOnClickListener(v -> {
             Intent intent = new Intent(SignUp.this, SignIn.class);
             startActivity(intent);
-            finish(); // Finish the SignUp activity so the user can't go back with back button
+            finish();
         });
     }
 
@@ -99,88 +95,137 @@ public class SignUp extends AppCompatActivity {
         String password = Objects.requireNonNull(passwordInput.getText()).toString().trim();
         String confirmPassword = Objects.requireNonNull(confirmPasswordInput.getText()).toString().trim();
 
-        boolean cancel = false; // Flag to indicate if any validation failed
+        boolean cancel = false;
 
-        // Validate username
         if (TextUtils.isEmpty(username)) {
             usernameInputLayout.setError("Username is required.");
+            Toast.makeText(this, "Username is required.", Toast.LENGTH_SHORT).show();
             cancel = true;
         }
 
-        // Validate address
         if (TextUtils.isEmpty(address)) {
             addressInputLayout.setError("Address is required.");
+            Toast.makeText(this, "Address is required.", Toast.LENGTH_SHORT).show();
             cancel = true;
         }
 
-        // Validate mobile number (10 digits)
         if (TextUtils.isEmpty(mobileNumber)) {
             mobileNumberInputLayout.setError("Mobile Number is required.");
+            Toast.makeText(this, "Mobile Number is required.", Toast.LENGTH_SHORT).show();
             cancel = true;
-        } else if (!Pattern.matches("\\d{10}", mobileNumber)) { // Simple check for 10 digits
-            mobileNumberInputLayout.setError("Please enter a valid 10-digit mobile number.");
-            cancel = true;
+        } else {
+            if (mobileNumber.startsWith("+94")) {
+                if (mobileNumber.length() != 12) {
+                    mobileNumberInputLayout.setError("Mobile number starting with '+94' must be 12 characters long (e.g., +94712345678).");
+                    Toast.makeText(this, "Mobile number starting with '+94' must be 12 characters long.", Toast.LENGTH_LONG).show();
+                    cancel = true;
+                } else if (!Pattern.matches("\\+94\\d{9}", mobileNumber)) {
+                    mobileNumberInputLayout.setError("Please enter a valid 12-character mobile number starting with '+94'.");
+                    Toast.makeText(this, "Invalid mobile number format for +94.", Toast.LENGTH_LONG).show();
+                    cancel = true;
+                }
+            } else if (mobileNumber.startsWith("07")) {
+                if (mobileNumber.length() != 10) {
+                    mobileNumberInputLayout.setError("Mobile number starting with '07' must be 10 characters long.");
+                    Toast.makeText(this, "Mobile number starting with '07' must be 10 characters long.", Toast.LENGTH_LONG).show();
+                    cancel = true;
+                } else if (!Pattern.matches("07\\d{8}", mobileNumber)) {
+                    mobileNumberInputLayout.setError("Please enter a valid 10-digit mobile number starting with '07'.");
+                    Toast.makeText(this, "Invalid mobile number format for 07.", Toast.LENGTH_LONG).show();
+                    cancel = true;
+                }
+            } else {
+                mobileNumberInputLayout.setError("Mobile number must start with '+94' or '07'.");
+                Toast.makeText(this, "Mobile number must start with '+94' or '07'.", Toast.LENGTH_LONG).show();
+                cancel = true;
+            }
         }
 
-        // Validate email
         if (TextUtils.isEmpty(email)) {
             emailInputLayout.setError("Email is required.");
+            Toast.makeText(this, "Email is required.", Toast.LENGTH_SHORT).show();
             cancel = true;
         } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             emailInputLayout.setError("Please enter a valid email address.");
+            Toast.makeText(this, "Please enter a valid email address.", Toast.LENGTH_LONG).show();
             cancel = true;
         }
 
-        // Validate password (complexity rules)
         if (TextUtils.isEmpty(password)) {
             passwordInputLayout.setError("Password is required.");
+            Toast.makeText(this, "Password is required.", Toast.LENGTH_SHORT).show();
             cancel = true;
         } else if (!isPasswordValid(password)) {
-            // isPasswordValid will set the error on passwordInputLayout directly if invalid
             cancel = true;
         }
 
-        // Validate confirm password
         if (TextUtils.isEmpty(confirmPassword)) {
             confirmPasswordInputLayout.setError("Please confirm your password.");
+            Toast.makeText(this, "Please confirm your password.", Toast.LENGTH_SHORT).show();
             cancel = true;
         } else if (!password.equals(confirmPassword)) {
             confirmPasswordInputLayout.setError("Passwords don't match. Please try again.");
+            Toast.makeText(this, "Passwords don't match. Please try again.", Toast.LENGTH_LONG).show();
             cancel = true;
         }
 
         if (cancel) {
-            Toast.makeText(this, "Please fix the errors to proceed.", Toast.LENGTH_SHORT).show();
+            return;
         } else {
-            // All validations passed, proceed with Firebase registration
-            progressBar.setVisibility(View.VISIBLE); // Show progress bar
-            registerUserInFirebase(email, password, username, address, mobileNumber);
+            progressBar.setVisibility(View.VISIBLE);
+            checkEmailExistenceAndRegister(email, password, username, address, mobileNumber);
         }
     }
 
     private boolean isPasswordValid(String password) {
-        // Set error directly on the TextInputLayout and return false if a condition isn't met.
+        passwordInputLayout.setError(null);
+
         if (password.length() < 8) {
             passwordInputLayout.setError("Password must be at least 8 characters long.");
+            Toast.makeText(this, "Password must be at least 8 characters long.", Toast.LENGTH_LONG).show();
             return false;
         }
         if (!password.matches(".*[A-Z].*")) {
             passwordInputLayout.setError("Password needs at least one uppercase letter.");
+            Toast.makeText(this, "Password needs at least one uppercase letter.", Toast.LENGTH_LONG).show();
             return false;
         }
         if (!password.matches(".*[a-z].*")) {
             passwordInputLayout.setError("Password needs at least one lowercase letter.");
+            Toast.makeText(this, "Password needs at least one lowercase letter.", Toast.LENGTH_LONG).show();
             return false;
         }
         if (!password.matches(".*\\d.*")) {
             passwordInputLayout.setError("Password needs at least one digit.");
+            Toast.makeText(this, "Password needs at least one digit.", Toast.LENGTH_LONG).show();
             return false;
         }
         if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
             passwordInputLayout.setError("Password needs at least one special character.");
+            Toast.makeText(this, "Password needs at least one special character.", Toast.LENGTH_LONG).show();
             return false;
         }
-        return true; // All p;O?assword rules are met
+        return true;
+    }
+
+    private void checkEmailExistenceAndRegister(String email, String password, String username, String address, String mobileNumber) {
+        mAuth.fetchSignInMethodsForEmail(email)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        boolean isNewUser = task.getResult().getSignInMethods().isEmpty();
+                        if (isNewUser) {
+                            registerUserInFirebase(email, password, username, address, mobileNumber);
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+                            emailInputLayout.setError("This email address is already registered.");
+                            Toast.makeText(SignUp.this, "This email address is already registered. Please sign in.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        progressBar.setVisibility(View.GONE);
+                        Log.e(TAG, "Error checking email existence: " + task.getException());
+                        Toast.makeText(SignUp.this, "Error checking email: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     private void registerUserInFirebase(String email, String password, String username, String address, String mobileNumber) {
@@ -188,28 +233,44 @@ public class SignUp extends AppCompatActivity {
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        progressBar.setVisibility(View.GONE); // Hide progress bar
+                        progressBar.setVisibility(View.GONE);
 
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
 
                             if (user != null) {
-                                // Save additional user details to Cloud Firestore
-                                saveUserDataToFirestore(user.getUid(), username, address, mobileNumber, email);
+                                // Send email verification
+                                user.sendEmailVerification()
+                                        .addOnCompleteListener(task1 -> {
+                                            if (task1.isSuccessful()) {
+                                                Log.d(TAG, "Email verification sent.");
+                                                Toast.makeText(SignUp.this, "Registration successful. Verification email sent to " + user.getEmail() + ". Please verify your email before signing in.", Toast.LENGTH_LONG).show();
+                                                // Only save user data to Firestore after email verification is sent
+                                                saveUserDataToFirestore(user.getUid(), username, address, mobileNumber, email, DEFAULT_COUNTRY);
+                                                // Navigate to SignIn activity, user needs to verify email first
+                                                Intent intent = new Intent(SignUp.this, SignIn.class);
+                                                startActivity(intent);
+                                                finish(); // Prevent going back to SignUp
+                                            } else {
+                                                Log.e(TAG, "Failed to send verification email.", task1.getException());
+                                                Toast.makeText(SignUp.this, "Registration successful, but failed to send verification email. Please try signing in later or contact support.", Toast.LENGTH_LONG).show();
+                                                // Even if email sending fails, we might still want to save user data if account was created
+                                                saveUserDataToFirestore(user.getUid(), username, address, mobileNumber, email, DEFAULT_COUNTRY);
+                                                // Still navigate to SignIn, as the account exists
+                                                Intent intent = new Intent(SignUp.this, SignIn.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        });
 
-                                Toast.makeText(SignUp.this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                                // Navigate to the main activity or a welcome screen
-                                Intent intent = new Intent(SignUp.this, SignIn.class);
-                                startActivity(intent);
-                                finish(); // Prevent going back to SignUp
                             }
                         } else {
-                            // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             String errorMessage = "Registration failed.";
-                            if (task.getException() != null) {
+                            if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                                errorMessage = "This email address is already registered. Please sign in.";
+                            } else if (task.getException() != null) {
                                 errorMessage += " " + task.getException().getMessage();
                             }
                             Toast.makeText(SignUp.this, errorMessage, Toast.LENGTH_LONG).show();
@@ -218,15 +279,15 @@ public class SignUp extends AppCompatActivity {
                 });
     }
 
-    // Save user data to Cloud Firestore
-    private void saveUserDataToFirestore(String userId, String username, String address, String mobileNumber, String email) {
+    private void saveUserDataToFirestore(String userId, String username, String address, String mobileNumber, String email, String country) {
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("username", username);
         userMap.put("email", email);
         userMap.put("address", address);
         userMap.put("mobileNumber", mobileNumber);
-        userMap.put("createdAt", FieldValue.serverTimestamp()); // Firestore server timestamp
-        userMap.put("author", false); // Set the default value of "author" to false
+        userMap.put("createdAt", FieldValue.serverTimestamp());
+        userMap.put("country", country);
+        userMap.put("author", false); // Default value
 
         db.collection("users").document(userId)
                 .set(userMap)

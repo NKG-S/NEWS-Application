@@ -36,12 +36,5 @@ public class GetStart extends AppCompatActivity {
             finish(); // Finish the GetStart activity so user can't go back to it
         });
 
-        // Ensure the correct ID is used here. It was 'UserInfo' in your snippet.
-        // Assuming 'main' is the root layout ID for activity_get_start.
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
     }
 }

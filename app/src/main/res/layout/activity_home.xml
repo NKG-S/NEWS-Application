@@ -7,6 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    tools:ignore="HardcodedText"
     tools:context=".home">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -35,16 +36,20 @@
                     android:layout_height="?attr/actionBarSize"
                     android:layout_marginTop="48dp"
                     android:background="@color/white"
+                    android:elevation="4dp"
                     android:paddingStart="24dp"
-                    android:paddingEnd="24dp"
-                    android:elevation="4dp">
+                    android:paddingEnd="24dp">
 
                     <ImageView
                         android:id="@+id/appLogo"
                         android:layout_width="70dp"
                         android:layout_height="45dp"
-                        android:layout_centerVertical="true"
                         android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
                         android:contentDescription="App Logo"
                         android:scaleType="fitCenter"
                         android:src="@drawable/iconwhite" />
@@ -56,12 +61,13 @@
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:contentDescription="Profile Picture"
-                        android:src="@drawable/user"
+                        android:elevation="2dp"
                         android:scaleType="centerCrop"
+                        android:src="@drawable/user"
                         app:shapeAppearanceOverlay="@style/CircleImageViewStyle"
                         app:strokeColor="@color/black"
-                        app:strokeWidth="2dp"
-                        android:elevation="2dp" />
+                        android:padding="1dp"
+                        app:strokeWidth="2dp" />
 
                 </RelativeLayout>
 
