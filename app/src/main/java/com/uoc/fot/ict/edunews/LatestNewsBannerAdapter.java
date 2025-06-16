@@ -69,8 +69,8 @@ public class LatestNewsBannerAdapter extends RecyclerView.Adapter<LatestNewsBann
         public void bind(NewsArticle article) {
             Glide.with(itemView.getContext())
                     .load(article.getImageUrl())
-                    .placeholder(R.drawable.image_placeholder_background)
-                    .error(R.drawable.image_placeholder_background)
+                    .placeholder(R.drawable.rounded_background_card)
+                    .error(R.drawable.rounded_background_card)
                     .into(bannerImage);
 
             String titleAndDescription = "";
