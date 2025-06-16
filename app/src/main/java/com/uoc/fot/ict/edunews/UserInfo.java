@@ -3,7 +3,7 @@ package com.uoc.fot.ict.edunews;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory; // NEW IMPORT: For BitmapFactory
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -13,38 +13,46 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.ImageDecoder;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.OnBackPressedCallback;
-
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream; // NEW IMPORT: For InputStream
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -63,6 +71,7 @@ public class UserInfo extends AppCompatActivity {
     private TextInputLayout usernameInputLayout, addressInputLayout, mobileInputLayout;
     private Button editSaveButton;
     private Button mainActionButton;
+    private Button deleteAccountButton;
     private ImageButton editProfilePictureButton;
     private CircleImageView profilePicture;
     private ProgressBar progressBar;
@@ -125,6 +134,8 @@ public class UserInfo extends AppCompatActivity {
         editSaveButton = findViewById(R.id.editSaveButton);
         Button dev_Info = findViewById(R.id.devInfo);
         mainActionButton = findViewById(R.id.mainActionButton);
+        deleteAccountButton = findViewById(R.id.deleteAccountButton);
+
         Button writeNewPostButton = findViewById(R.id.WriteNewPost);
         Button myPostsButton = findViewById(R.id.MyPosts);
         authorButtonsLayout = findViewById(R.id.authorButtonsLayout);
@@ -141,13 +152,12 @@ public class UserInfo extends AppCompatActivity {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         selectedImageUri = result.getData().getData();
                         if (selectedImageUri != null) {
-                            // Use Glide to immediately display the selected image
                             Glide.with(this).load(selectedImageUri).into(profilePicture);
                             Toast.makeText(this, "Image selected, click 'Save' to upload.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         Toast.makeText(this, "Image selection cancelled.", Toast.LENGTH_SHORT).show();
-                        selectedImageUri = null; // Clear selected URI if cancelled
+                        selectedImageUri = null;
                     }
                 }
         );
@@ -200,6 +210,12 @@ public class UserInfo extends AppCompatActivity {
         editProfilePictureButton.setOnClickListener(v -> {
             if (isEditMode) {
                 openImageChooser();
+            }
+        });
+
+        deleteAccountButton.setOnClickListener(v -> {
+            if (isEditMode) {
+                confirmDeleteAccount();
             }
         });
 
@@ -290,6 +306,7 @@ public class UserInfo extends AppCompatActivity {
 
     /**
      * Updates the UI with user data and sets editability.
+     * @param editable True to enable edit mode, false for view mode.
      */
     private void displayUserData(boolean editable) {
         usernameInput.setText(currentUsername);
@@ -326,6 +343,10 @@ public class UserInfo extends AppCompatActivity {
             mainActionButton.setText("Cancel");
             mainActionButton.setBackgroundTintList(getResources().getColorStateList(R.color.RedColour, getTheme()));
 
+            deleteAccountButton.setVisibility(View.VISIBLE);
+            deleteAccountButton.setTextColor(getResources().getColor(R.color.white, getTheme()));
+            deleteAccountButton.setBackgroundTintList(getResources().getColorStateList(R.color.RedColour, getTheme()));
+
             editProfilePictureButton.setVisibility(View.VISIBLE);
 
             usernameInput.setTextColor(getResources().getColor(R.color.black, getTheme()));
@@ -333,10 +354,9 @@ public class UserInfo extends AppCompatActivity {
             mobileInput.setTextColor(getResources().getColor(R.color.black, getTheme()));
             emailInput.setTextColor(getResources().getColor(R.color.black, getTheme()));
 
-            // Hide author-specific buttons when in edit mode
             authorButtonsLayout.setVisibility(View.GONE);
 
-        } else { // View Mode
+        } else {
             editSaveButton.setText("Edit");
             editSaveButton.setVisibility(View.VISIBLE);
             editSaveButton.setTextColor(getResources().getColor(R.color.white, getTheme()));
@@ -345,6 +365,8 @@ public class UserInfo extends AppCompatActivity {
             mainActionButton.setText("Sign Out");
             mainActionButton.setBackgroundTintList(getResources().getColorStateList(R.color.ButtonColour, getTheme()));
 
+            deleteAccountButton.setVisibility(View.GONE);
+
             editProfilePictureButton.setVisibility(View.GONE);
 
             usernameInput.setTextColor(Color.parseColor("#80000000"));
@@ -352,7 +374,6 @@ public class UserInfo extends AppCompatActivity {
             mobileInput.setTextColor(Color.parseColor("#80000000"));
             emailInput.setTextColor(Color.parseColor("#80000000"));
 
-            // Show author-specific buttons based on isAuthor flag when in view mode
             updateAuthorButtonVisibility();
         }
     }
@@ -374,7 +395,7 @@ public class UserInfo extends AppCompatActivity {
     private void toggleEditMode() {
         isEditMode = !isEditMode;
         displayUserData(isEditMode);
-        selectedImageUri = null; // Clear selected image URI when toggling mode
+        selectedImageUri = null;
     }
 
     /**
@@ -429,19 +450,15 @@ public class UserInfo extends AppCompatActivity {
 
         executorService.execute(() -> {
             try {
-                // Handle profile picture upload first if a new one is selected
                 if (selectedImageUri != null) {
                     Bitmap bitmap;
-                    // Check Android version to use appropriate method for getting bitmap
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), selectedImageUri));
                     } else {
-                        // For older Android versions, use a more robust way than deprecated getBitmap
-                        // This involves opening an InputStream and decoding it
                         InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
                         bitmap = BitmapFactory.decodeStream(imageStream);
                         if (imageStream != null) {
-                            imageStream.close(); // Close the stream
+                            imageStream.close();
                         }
                     }
 
@@ -451,7 +468,7 @@ public class UserInfo extends AppCompatActivity {
                             Toast.makeText(UserInfo.this, "Failed to decode image.", Toast.LENGTH_LONG).show();
                             Log.e(TAG, "Bitmap is null after decoding image URI.");
                         });
-                        return; // Exit if bitmap is null
+                        return;
                     }
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -479,7 +496,6 @@ public class UserInfo extends AppCompatActivity {
                                 });
                             });
                 } else {
-                    // If no new image selected, just update Firestore data
                     updateFirestoreUserData(newUsername, newAddress, newMobile, currentProfilePictureUrl);
                 }
             } catch (IOException e) {
@@ -496,7 +512,7 @@ public class UserInfo extends AppCompatActivity {
         Map<String, Object> updates = new HashMap<>();
         updates.put("username", newUsername);
         updates.put("address", newAddress);
-        updates.put("mobileNumber", newMobile); // Ensure this matches Firestore field name
+        updates.put("mobileNumber", newMobile);
         if (profilePictureUrl != null) {
             updates.put("profilePictureUrl", profilePictureUrl);
         }
@@ -511,8 +527,8 @@ public class UserInfo extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         Toast.makeText(UserInfo.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
                         isEditMode = false;
-                        displayUserData(false); // Switch back to view mode
-                        selectedImageUri = null; // Clear selected image
+                        displayUserData(false);
+                        selectedImageUri = null;
                     });
                 })
                 .addOnFailureListener(e -> {
@@ -539,17 +555,233 @@ public class UserInfo extends AppCompatActivity {
     private void signOutUser() {
         mAuth.signOut();
         Toast.makeText(this, "Signed out successfully.", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(UserInfo.this, SignIn.class); // Assuming SignIn is your login activity
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Clear back stack
+        Intent intent = new Intent(UserInfo.this, SignIn.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-        finish(); // Finish current activity
+        finish();
+    }
+
+    /**
+     * Confirms user wants to delete account and handles additional options (like deleting posts).
+     */
+    private void confirmDeleteAccount() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete Account");
+        // Removed the duplicate message
+        builder.setMessage("Are you sure you want to delete your account?\nThis action is irreversible.");
+
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_delete_account, null);
+        CheckBox deletePostsCheckbox = dialogView.findViewById(R.id.deletePostsCheckbox);
+        TextView deletePostsTextView = dialogView.findViewById(R.id.deletePostsTextView); // Corrected ID usage
+        LinearLayout deletePostsOptionLayout = dialogView.findViewById(R.id.deletePostsOptionLayout); // Get reference to parent layout
+
+        if (isAuthor) {
+            deletePostsOptionLayout.setVisibility(View.VISIBLE); // Show the entire LinearLayout
+            // No need to set individual checkbox/text visibility if parent is handled
+        } else {
+            deletePostsOptionLayout.setVisibility(View.GONE); // Hide the entire LinearLayout
+        }
+
+        builder.setView(dialogView);
+
+        builder.setPositiveButton("Delete", (dialog, which) -> {
+            boolean deletePosts = isAuthor && deletePostsCheckbox.isChecked();
+            executeAccountDeletion(deletePosts);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
+    /**
+     * Executes the account deletion process, including associated data.
+     * @param deletePosts True if author's posts should also be deleted.
+     */
+    private void executeAccountDeletion(boolean deletePosts) {
+        if (currentUser == null) {
+            Toast.makeText(this, "No user logged in to delete.", Toast.LENGTH_SHORT).show();
+            signOutAndNavigateToSignIn();
+            return;
+        }
+
+        progressBar.setVisibility(View.VISIBLE);
+        editSaveButton.setEnabled(false);
+        mainActionButton.setEnabled(false);
+        if (deleteAccountButton != null) deleteAccountButton.setEnabled(false);
+
+        Toast.makeText(this, "Deleting account...", Toast.LENGTH_LONG).show();
+
+        // Step 1: Delete profile picture (if exists)
+        deleteProfilePicture(() -> {
+            // Step 2 (Conditional): Delete user's posts and images (if author and checkbox checked)
+            deleteUserPostsAndImages(deletePosts, () -> {
+                // Step 3: Delete user document from Firestore
+                deleteUserDocument(() -> {
+                    // Step 4: Delete user from Firebase Authentication
+                    deleteFirebaseAuthAccount();
+                });
+            });
+        });
+    }
+
+    /**
+     * Handles failures during deletion process.
+     */
+    private void handleDeletionFailure(String message, Exception e) {
+        handler.post(() -> {
+            progressBar.setVisibility(View.GONE);
+            editSaveButton.setEnabled(true);
+            mainActionButton.setEnabled(true);
+            if (deleteAccountButton != null) deleteAccountButton.setEnabled(true);
+            Toast.makeText(UserInfo.this, message + (e != null ? ": " + e.getMessage() : ""), Toast.LENGTH_LONG).show();
+            if (e != null) Log.e(TAG, message, e);
+        });
+    }
+
+    /**
+     * Step 1 in deletion process: Deletes the user's profile picture from Storage.
+     * @param onComplete Callback to run after profile picture deletion attempt (success or failure).
+     */
+    private void deleteProfilePicture(Runnable onComplete) {
+        if (currentProfilePictureUrl != null && !currentProfilePictureUrl.isEmpty()) {
+            try {
+                StorageReference profilePicRef = FirebaseStorage.getInstance().getReferenceFromUrl(currentProfilePictureUrl);
+                profilePicRef.delete()
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "Profile picture deleted successfully.");
+                            onComplete.run();
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Failed to delete profile picture: " + e.getMessage());
+                            onComplete.run();
+                        });
+            } catch (IllegalArgumentException e) {
+                Log.w(TAG, "Profile picture URL is not a valid Firebase Storage URL. Skipping deletion. Error: " + e.getMessage());
+                onComplete.run();
+            }
+        } else {
+            onComplete.run();
+        }
+    }
+
+    /**
+     * Step 2 in deletion process: Deletes user's posts and their associated images (if user is author and opted to delete posts).
+     * @param deletePosts True if posts should be deleted.
+     * @param onComplete Callback to run after post deletion attempts.
+     */
+    private void deleteUserPostsAndImages(boolean deletePosts, Runnable onComplete) {
+        if (isAuthor && deletePosts && currentUser != null) { // Only proceed if author and deletePosts is true
+            db.collection("posts")
+                    .whereEqualTo("userId", currentUser.getUid())
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            List<Task<Void>> deletionTasks = new ArrayList<>();
+                            for (QueryDocumentSnapshot doc : task.getResult()) {
+                                String imageUrl = doc.getString("imageUrl");
+                                if (imageUrl != null && !imageUrl.isEmpty()) {
+                                    try {
+                                        StorageReference postImageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageUrl);
+                                        deletionTasks.add(postImageRef.delete().addOnFailureListener(e -> Log.e(TAG, "Failed to delete post image for post " + doc.getId() + ": " + e.getMessage())));
+                                    } catch (IllegalArgumentException e) {
+                                        Log.w(TAG, "Post image URL for post " + doc.getId() + " not valid, skipping image deletion: " + e.getMessage());
+                                    }
+                                }
+                                deletionTasks.add(doc.getReference().delete().addOnFailureListener(e -> Log.e(TAG, "Failed to delete post document " + doc.getId() + ": " + e.getMessage())));
+                            }
+
+                            Tasks.whenAll(deletionTasks)
+                                    .addOnCompleteListener(allTasks -> {
+                                        if (allTasks.isSuccessful()) {
+                                            Log.d(TAG, "All posts and their images deleted successfully for author " + currentUser.getUid());
+                                        } else {
+                                            Log.e(TAG, "Some post/image deletions failed during user account deletion for author " + currentUser.getUid());
+                                        }
+                                        onComplete.run();
+                                    });
+                        } else {
+                            Log.e(TAG, "Failed to fetch user's posts for deletion: " + task.getException());
+                            onComplete.run();
+                        }
+                    });
+        } else {
+            onComplete.run(); // No posts to delete or not an author
+        }
+    }
+
+    /**
+     * Step 3 in deletion process: Deletes the user document from Firestore.
+     * @param onComplete Callback to run after document deletion attempt.
+     */
+    private void deleteUserDocument(Runnable onComplete) {
+        if (currentUser != null) {
+            db.collection("users").document(currentUser.getUid()).delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "User document deleted from Firestore successfully.");
+                        onComplete.run();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to delete user document: " + e.getMessage());
+                        onComplete.run();
+                    });
+        } else {
+            onComplete.run();
+        }
+    }
+
+    /**
+     * Step 4 in deletion process: Deletes the user's account from Firebase Authentication.
+     */
+    private void deleteFirebaseAuthAccount() {
+        if (currentUser != null) {
+            currentUser.delete()
+                    .addOnCompleteListener(task -> {
+                        handler.post(() -> {
+                            progressBar.setVisibility(View.GONE);
+                            if (task.isSuccessful()) {
+                                Toast.makeText(UserInfo.this, "Account deleted successfully.", Toast.LENGTH_SHORT).show();
+                                signOutAndNavigateToSignIn();
+                            } else {
+                                if (task.getException() instanceof FirebaseAuthRecentLoginRequiredException) {
+                                    Toast.makeText(UserInfo.this, "For security, please sign out and sign in again, then re-attempt account deletion.", Toast.LENGTH_LONG).show();
+                                    Log.w(TAG, "Re-authentication required for account deletion.");
+                                    signOutAndNavigateToSignIn();
+                                } else {
+                                    Toast.makeText(UserInfo.this, "Failed to delete account: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                                    Log.e(TAG, "Error deleting Firebase Auth account", task.getException());
+                                    editSaveButton.setEnabled(true);
+                                    mainActionButton.setEnabled(true);
+                                    if (deleteAccountButton != null) deleteAccountButton.setEnabled(true);
+                                }
+                            }
+                        });
+                    });
+        } else {
+            signOutAndNavigateToSignIn();
+        }
+    }
+
+    /**
+     * Helper method to sign out and navigate to the SignIn screen.
+     */
+    private void signOutAndNavigateToSignIn() {
+        if (mAuth.getCurrentUser() != null) {
+            mAuth.signOut();
+        }
+        Intent intent = new Intent(UserInfo.this, SignIn.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (executorService != null) {
-            executorService.shutdownNow(); // Shut down the executor service
+            executorService.shutdownNow();
+        }
+        if (onBackPressedCallback != null) {
+            onBackPressedCallback.remove();
         }
     }
 }

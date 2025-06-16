@@ -119,9 +119,9 @@ public class SignUp extends AppCompatActivity {
                     mobileNumberInputLayout.setError("Mobile number starting with '+94' must be 12 characters long (e.g., +94712345678).");
                     Toast.makeText(this, "Mobile number starting with '+94' must be 12 characters long.", Toast.LENGTH_LONG).show();
                     cancel = true;
-                } else if (!Pattern.matches("\\+94\\d{9}", mobileNumber)) {
-                    mobileNumberInputLayout.setError("Please enter a valid 12-character mobile number starting with '+94'.");
-                    Toast.makeText(this, "Invalid mobile number format for +94.", Toast.LENGTH_LONG).show();
+                } else if (!Pattern.matches("\\+\\d{12}", mobileNumber)) {
+                    mobileNumberInputLayout.setError("Please enter a valid 12-character mobile number starting with Country code.");
+                    Toast.makeText(this, "Invalid mobile number format with Country code", Toast.LENGTH_LONG).show();
                     cancel = true;
                 }
             } else if (mobileNumber.startsWith("07")) {
