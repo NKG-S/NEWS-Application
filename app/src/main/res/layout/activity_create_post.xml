@@ -12,7 +12,7 @@
         android:id="@+id/topBar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="28dp"
         android:background="@color/white"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
@@ -50,6 +50,7 @@
             android:layout_centerVertical="true"
             android:contentDescription="Profile Picture"
             android:src="@drawable/user"
+            android:scaleType="centerCrop"
             app:shapeAppearanceOverlay="@style/CircleImageViewStyle"
             app:strokeColor="@color/black"
             app:strokeWidth="1dp" />
@@ -88,162 +89,177 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:hint="Enter post title"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusTopStart="8dp"
                 app:boxStrokeColor="@color/black"
                 app:hintTextColor="@android:color/darker_gray">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/TitleInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/montserrat"
-                    android:inputType="textCapSentences"
-                    android:textColor="@color/black"
-                    android:textSize="14sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:id="@+id/CategoryTXT"
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/TitleInput"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/montserrat_medium"
-                android:text="Category"
+                android:fontFamily="@font/montserrat"
+                android:inputType="textCapSentences"
                 android:textColor="@color/black"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textSize="14sp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/categoryInputLayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+        <TextView
+            android:id="@+id/CategoryTXT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/montserrat_medium"
+            android:text="Category"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/categoryInputLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Select category"
+            app:boxBackgroundColor="@color/white"
+            app:boxCornerRadiusBottomEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxStrokeColor="@color/black"
+            app:hintTextColor="@android:color/darker_gray"
+            app:endIconTint="@color/black">
+
+        <AutoCompleteTextView
+            android:id="@+id/CategoryInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
+            android:inputType="none"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:dropDownSelector="@color/white"
+            android:popupBackground="@color/white"
+            android:dropDownVerticalOffset="4dp"
+            android:dropDownHorizontalOffset="0dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/DescriptionTXT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/montserrat_medium"
+            android:text="Description"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/descriptionInputLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="Enter post description"
+            app:boxCornerRadiusBottomEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxStrokeColor="@color/black"
+            app:hintTextColor="@android:color/darker_gray">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/DescriptionInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
+            android:gravity="top"
+            android:inputType="textMultiLine"
+            android:minLines="5"
+            android:maxLines="10"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/ImageTXT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/montserrat_medium"
+            android:text="Image"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
+
+        <FrameLayout
+            android:id="@+id/imagePickerContainer"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:padding="4dp"
+            android:background="@color/light_grey"
+            android:clipChildren="true">
+
+            <ImageView
+                android:id="@+id/postImagePreview"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="Select category"
-                app:boxBackgroundColor="@color/white"
-                app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray"
-                app:endIconTint="@color/black">
+                android:layout_height="match_parent"
+                android:background="@android:color/white"
+                android:contentDescription="Post Image Preview"
+                android:scaleType="centerCrop" />
 
-                <AutoCompleteTextView
-                    android:id="@+id/CategoryInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/montserrat"
-                    android:inputType="none"
-                    android:textColor="@android:color/black"
-                    android:textSize="14sp"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:dropDownSelector="@color/white"
-                    android:popupBackground="@color/white"
-                    android:dropDownVerticalOffset="4dp"
-                    android:dropDownHorizontalOffset="0dp"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:id="@+id/DescriptionTXT"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/montserrat_medium"
-                android:text="Description"
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/descriptionInputLayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <ImageButton
+                android:id="@+id/pickImageButton"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:hint="Enter post description"
-                app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray">
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:background="@drawable/circle_translucent_add_button"
+                android:contentDescription="Pick Image"
+                android:src="@drawable/add_icon"
+                app:tint="@color/black" />
+        </FrameLayout>
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/DescriptionInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/montserrat"
-                    android:gravity="top"
-                    android:inputType="textMultiLine"
-                    android:minLines="5"
-                    android:maxLines="10"
-                    android:textColor="@color/black"
-                    android:textSize="14sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+        <ImageButton
+            android:id="@+id/clearImageButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Clear Image"
+            android:src="@drawable/cross"
+            android:visibility="gone"
+            app:tint="@color/black" />
 
-            <TextView
-                android:id="@+id/ImageTXT"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/montserrat_medium"
-                android:text="Image"
-                android:textColor="@color/black"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+        </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical">
+        <Space
+        android:layout_width="match_parent"
+        android:layout_height="40dp" />
 
-                <FrameLayout
-                    android:id="@+id/imagePickerContainer"
-                    android:background="#4B4B4B"
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:padding="4dp">
-
-                    <ImageView
-                        android:id="@+id/postImagePreview"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@android:color/white"
-                        android:contentDescription="Post Image Preview"
-                        android:scaleType="centerCrop" />
-
-                    <ImageButton
-                        android:id="@+id/pickImageButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@android:color/white"
-                        android:contentDescription="Pick Image"
-                        android:src="@drawable/add_icon" />
-                </FrameLayout>
-
-                <ImageButton
-                    android:id="@+id/clearImageButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Clear Image"
-                    android:src="@drawable/cross"
-                    android:visibility="gone"
-                    app:tint="@color/black" />
-
-            </LinearLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="40dp" />
-
-            <Button
-                android:id="@+id/submitButton"
-                android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:backgroundTint="@color/RedColour"
-                android:fontFamily="@font/montserrat_bold"
-                android:text="Submit"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+        <Button
+            android:id="@+id/submitButton"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:background="@drawable/button_submit_gradient"
+            android:fontFamily="@font/montserrat_bold"
+            android:text="Submit"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp"/>
 
         </LinearLayout>
     </ScrollView>
@@ -258,4 +274,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>

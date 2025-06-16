@@ -16,6 +16,7 @@
         android:background="@color/white"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:elevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,8 +24,8 @@
 
         <ImageButton
             android:id="@+id/backButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -40,12 +41,12 @@
             android:fontFamily="@font/montserrat_semibold"
             android:text="View/Edit Post"
             android:textColor="@color/black"
-            android:textSize="20sp" />
+            android:textSize="22sp" />
 
         <ImageButton
             android:id="@+id/editOrCancelButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -55,28 +56,29 @@
     </RelativeLayout>
 
     <ScrollView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topBar">
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/topBar">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
+            <!-- Title Section -->
             <TextView
                 android:id="@+id/TitleTXT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:fontFamily="@font/montserrat_medium"
                 android:text="Title"
                 android:textColor="@color/black"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -87,19 +89,24 @@
                 android:layout_marginTop="8dp"
                 android:hint="Enter post title"
                 app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray">
+                app:hintTextColor="@color/dark_grey"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/TitleInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/montserrat"
-                    android:inputType="textCapSentences"
-                    android:textColor="@color/black"
-                    android:textSize="14sp"
-                    android:enabled="false" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/TitleInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:inputType="textCapSentences"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:enabled="false" />
             </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Category Section -->
             <TextView
                 android:id="@+id/CategoryTXT"
                 android:layout_width="wrap_content"
@@ -108,7 +115,7 @@
                 android:fontFamily="@font/montserrat_medium"
                 android:text="Category"
                 android:textColor="@color/black"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -120,8 +127,12 @@
                 android:hint="Select category"
                 app:boxBackgroundColor="@color/white"
                 app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray"
-                app:endIconTint="@color/black">
+                app:hintTextColor="@color/dark_grey"
+                app:endIconTint="@color/black"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp">
 
                 <AutoCompleteTextView
                     android:id="@+id/CategoryInput"
@@ -129,7 +140,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/montserrat"
                     android:textColor="@android:color/black"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:enabled="false"
                     android:dropDownSelector="@android:color/transparent"
                     android:popupBackground="@color/white"
@@ -142,8 +153,10 @@
                     android:clickable="false"
                     android:inputType="none"
                     android:longClickable="false"/>
+
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Description Section -->
             <TextView
                 android:id="@+id/DescriptionTXT"
                 android:layout_width="wrap_content"
@@ -152,7 +165,7 @@
                 android:fontFamily="@font/montserrat_medium"
                 android:text="Description"
                 android:textColor="@color/black"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -163,7 +176,11 @@
                 android:layout_marginTop="8dp"
                 android:hint="Enter post description"
                 app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray">
+                app:hintTextColor="@color/dark_grey"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/DescriptionInput"
@@ -175,10 +192,12 @@
                     android:minLines="5"
                     android:maxLines="10"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:enabled="false" />
+
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Image Section -->
             <TextView
                 android:id="@+id/ImageTXT"
                 android:layout_width="wrap_content"
@@ -187,97 +206,101 @@
                 android:fontFamily="@font/montserrat_medium"
                 android:text="Image"
                 android:textColor="@color/black"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-                <FrameLayout
-                    android:id="@+id/imagePickerContainer"
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:background="#4B4B4B"
-                    android:padding="4dp">
+            <FrameLayout
+                android:id="@+id/imagePickerContainer"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:padding="4dp"
+                android:background="@color/light_grey"
+                android:clipChildren="true"
+                android:elevation="2dp" >
 
-                    <ImageView
-                        android:id="@+id/postImagePreview"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@android:color/white"
-                        android:contentDescription="Post Image Preview"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/add_icon" />
-
-                    <ImageButton
-                        android:id="@+id/pickImageButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:background="@android:color/transparent"
-                        android:contentDescription="Pick Image"
-                        android:src="@drawable/add_icon"
-                        android:visibility="gone" />
-
-
-                </FrameLayout>
+                <ImageView
+                    android:id="@+id/postImagePreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"
+                    android:contentDescription="Post Image Preview"
+                    android:scaleType="centerCrop" />
 
                 <ImageButton
-                    android:id="@+id/clearImageButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="8dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Clear Image"
-                    android:src="@drawable/cross"
-                    app:tint="@color/black"
-                    android:visibility="gone" />
+                    android:id="@+id/pickImageButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@drawable/circle_translucent_add_button"
+                    android:contentDescription="Pick Image"
+                    android:src="@drawable/add_icon"
+                    app:tint="@color/black" />
+
+            </FrameLayout>
+
+            <ImageButton
+            android:id="@+id/clearImageButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Clear Image"
+            android:src="@drawable/cross"
+            app:tint="@color/black"
+            android:visibility="gone" />
 
             </LinearLayout>
-
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="20dp" />
+                android:layout_height="32dp" />
 
+                <!-- Action Buttons -->
             <Button
                 android:id="@+id/submitButton"
                 android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:backgroundTint="@color/RedColour"
+                android:layout_height="58dp"
+                android:background="@drawable/button_red_gradient"
                 android:fontFamily="@font/montserrat_bold"
                 android:text="Update Post"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
+                app:cornerRadius="12dp"
+                android:elevation="4dp"
                 android:visibility="gone" />
 
             <Button
                 android:id="@+id/deleteButton"
                 android:layout_width="match_parent"
-                android:layout_height="55dp"
+                android:layout_height="58dp"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="@color/RedColour"
+                android:background="@drawable/button_red_gradient"
                 android:fontFamily="@font/montserrat_bold"
                 android:text="Delete Post"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
+                app:cornerRadius="12dp"
+                android:elevation="4dp"
                 android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
 
     <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    android:id="@+id/progressBar"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,7 +15,6 @@
         android:id="@+id/topBar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="32dp"
         android:background="@color/white"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
@@ -42,8 +41,7 @@
             android:fontFamily="@font/montserrat_bold"
             android:text="Profile"
             android:textColor="@color/black"
-            android:textSize="20sp" />
-
+            android:textSize="22sp" />
         <Button
             android:id="@+id/editSaveButton"
             style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -51,12 +49,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:backgroundTint="@color/ButtonColour"
+            android:background="@drawable/button_primary_gradient"
             android:fontFamily="@font/montserrat_bold"
             android:text="Edit"
             android:textColor="@color/white"
-            android:textSize="16sp" />
-
+            android:textSize="16sp"
+            app:cornerRadius="12dp"
+            android:minHeight="48dp"
+            android:elevation="2dp" />
     </RelativeLayout>
 
     <ScrollView
@@ -71,57 +71,56 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp"> <RelativeLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="28dp">
 
-            <RelativeLayout
-                android:layout_width="110dp"
-                android:layout_height="110dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="24dp">
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profilePicture"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:padding="2dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/user"
+                app:civ_border_color="@color/black"
+                app:civ_border_width="2dp" />
 
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/profilePicture"
-                    android:layout_width="110dp"
-                    android:layout_height="110dp"
-                    android:padding="4dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/user"
-                    app:civ_border_color="@color/black"
-                    app:civ_border_width="2dp" />
-
-                <ImageButton
-                    android:id="@+id/editProfilePictureButton"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginEnd="0dp"
-                    android:layout_marginBottom="-1dp"
-                    android:background="@drawable/circle_shape_red"
-                    android:contentDescription="Edit Profile Picture"
-                    android:src="@drawable/edit"
-                    app:tint="@color/white"
-                    android:visibility="gone" /> </RelativeLayout>
+            <ImageButton
+                android:id="@+id/editProfilePictureButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
+                android:background="@drawable/circle_profile_edit_red_button"
+                android:contentDescription="Edit Profile Picture"
+                android:src="@drawable/edit"
+                android:padding="8dp"
+                app:tint="@color/white"
+                android:elevation="4dp"
+                android:visibility="gone" />
+        </RelativeLayout>
 
             <TextView
                 android:id="@+id/personalDetailsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="36dp"
                 android:fontFamily="@font/montserrat_bold"
                 android:text="Personal Details"
                 android:textColor="@color/black"
-                android:textSize="22sp" />
-
-            <TextView
+                android:textSize="24sp" /> <TextView
                 android:id="@+id/EmailTXT"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:fontFamily="@font/montserrat_medium"
                 android:text="Email Address"
                 android:textColor="@color/black"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -132,7 +131,11 @@
                 android:layout_marginTop="8dp"
                 android:hint="Your email address"
                 app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray">
+                app:hintTextColor="@color/dark_grey"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/EmailInput"
@@ -141,7 +144,7 @@
                     android:fontFamily="@font/montserrat"
                     android:inputType="textEmailAddress"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:enabled="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
@@ -157,7 +160,7 @@
                 android:fontFamily="@font/montserrat_medium"
                 android:text="Username"
                 android:textColor="@color/black"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -168,7 +171,11 @@
                 android:layout_marginTop="8dp"
                 android:hint="Your username"
                 app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray">
+                app:hintTextColor="@color/dark_grey"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/UsernameInput"
@@ -177,7 +184,7 @@
                     android:fontFamily="@font/montserrat"
                     android:inputType="textCapWords"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:enabled="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
@@ -193,7 +200,7 @@
                 android:fontFamily="@font/montserrat_medium"
                 android:text="Residential Address"
                 android:textColor="@color/black"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -204,7 +211,11 @@
                 android:layout_marginTop="8dp"
                 android:hint="Your full address"
                 app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray">
+                app:hintTextColor="@color/dark_grey"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/AddressInput"
@@ -216,7 +227,7 @@
                     android:gravity="top"
                     android:minLines="1"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:enabled="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
@@ -232,7 +243,7 @@
                 android:fontFamily="@font/montserrat_medium"
                 android:text="Mobile Phone Number"
                 android:textColor="@color/black"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -243,7 +254,11 @@
                 android:layout_marginTop="8dp"
                 android:hint="e.g., +94 712345678"
                 app:boxStrokeColor="@color/black"
-                app:hintTextColor="@android:color/darker_gray">
+                app:hintTextColor="@color/dark_grey"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/MobileInput"
@@ -252,7 +267,7 @@
                     android:fontFamily="@font/montserrat"
                     android:inputType="phone"
                     android:textColor="@color/black"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:enabled="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
@@ -263,64 +278,70 @@
             <Button
                 android:id="@+id/mainActionButton"
                 android:layout_width="match_parent"
-                android:layout_height="55dp"
-                android:layout_marginTop="40dp"
-                android:backgroundTint="@color/ButtonColour"
+                android:layout_height="60dp"
+                android:layout_marginTop="48dp"
+                android:background="@drawable/button_primary_gradient"
                 android:fontFamily="@font/montserrat_bold"
                 android:text="Sign Out"
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <LinearLayout
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                android:elevation="4dp" /> <LinearLayout
                 android:id="@+id/authorButtonsLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="16dp"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal"
                 android:visibility="gone">
 
                 <Button
                     android:id="@+id/WriteNewPost"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:layout_weight="0"
-                    android:backgroundTint="@color/ButtonColour"
+                    android:layout_width="0dp"
+                    android:layout_height="55dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_primary_gradient"
                     android:fontFamily="@font/montserrat_bold"
                     android:text="Write a new post"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    android:visibility="visible" />
+                    android:visibility="visible"
+                    app:cornerRadius="12dp"
+                    android:elevation="4dp" />
 
                 <Button
                     android:id="@+id/MyPosts"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="4dp"
+                    android:layout_width="0dp"
+                    android:layout_height="55dp"
+                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    android:backgroundTint="@color/ButtonColour"
+                    android:background="@drawable/button_primary_gradient"
                     android:fontFamily="@font/montserrat_bold"
                     android:text="My Posts"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    android:visibility="visible" />
+                    android:visibility="visible"
+                    app:cornerRadius="12dp"
+                    android:elevation="4dp" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/devInfo"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="55dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="10dp"
-                android:backgroundTint="@color/ButtonColour"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/button_primary_gradient"
                 android:fontFamily="@font/montserrat_bold"
                 android:text="Developer information"
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="normal"
-                android:visibility="visible" />
+                android:visibility="visible"
+                app:cornerRadius="12dp"
+                android:elevation="4dp" />
 
         </LinearLayout>
     </ScrollView>

@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback; // NEW IMPORT
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -55,18 +56,14 @@ public class news extends AppCompatActivity {
         setContentView(R.layout.activity_news); // Set the layout for this activity
 
         // Initialize Firebase instances
-        // Firebase Instances
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         currentUser = mAuth.getCurrentUser();
-        // storage = FirebaseStorage.getInstance(); // Only if you need to manipulate storage
 
         // Initialize UI elements by finding them from the layout
         // Top bar elements
         postTitleTextView = findViewById(R.id.postTitle); // Top bar title
-        // Ensure profileIconImageView exists in your layout, adding null check for safety
         profileIconImageView = findViewById(R.id.profileIcon); // Top bar profile icon
-        // Top bar back button
         ImageButton backButton = findViewById(R.id.backButton); // Top bar back button
 
         // News article content elements
@@ -78,8 +75,27 @@ public class news extends AppCompatActivity {
         newsArticleDescriptionTextView = findViewById(R.id.newsArticleDescription);
         progressBar = findViewById(R.id.progressBar);
 
+        // NEW: Register OnBackPressedCallback
+        // This callback handles the back button press for this activity.
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true /* enabled */) {
+            @Override
+            public void handleOnBackPressed() {
+                // Implement your custom back behavior here
+                Log.d(TAG, "Back button pressed, handling via dispatcher.");
+                // You might want to navigate back to the home screen or categories
+                Intent intent = new Intent(news.this, home.class); // Assuming 'home.class' is your main feed activity
+                // These flags ensure that when you go back, you clear any intermediate activities
+                // and start a fresh 'home' activity if it's not already at the top.
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish(); // Finish the current news activity
+            }
+        });
+
         // Set up click listeners for the top bar buttons
-        backButton.setOnClickListener(v -> onBackPressed()); // Go back when back button is clicked
+        // NEW: Trigger the OnBackPressedDispatcher instead of directly calling onBackPressed()
+        backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
         // Only set click listener if profileIconImageView is found in the layout
         if (profileIconImageView != null) {
             profileIconImageView.setOnClickListener(v -> {
@@ -88,7 +104,6 @@ public class news extends AppCompatActivity {
                 startActivity(intent);
             });
         }
-
 
         // Get news article ID from the intent that started this activity
         // This ID is crucial for fetching the correct news article data from Firestore
@@ -246,19 +261,13 @@ public class news extends AppCompatActivity {
         }
     }
 
-    /**
-     * Handles the back button press.
-     * Navigates back to the home screen (or previous relevant activity) and clears the activity stack.
-     */
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        // You might want to navigate back to the home screen or categories
-        Intent intent = new Intent(news.this, home.class); // Assuming 'home.class' is your main feed activity
-        // These flags ensure that when you go back, you clear any intermediate activities
-        // and start a fresh 'home' activity if it's not already at the top.
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish(); // Finish the current news activity
-    }
+    // DEPRECATED: This method is replaced by the OnBackPressedCallback
+    // @Override
+    // public void onBackPressed() {
+    //     super.onBackPressed();
+    //     Intent intent = new Intent(news.this, home.class);
+    //     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+    //     startActivity(intent);
+    //     finish();
+    // }
 }

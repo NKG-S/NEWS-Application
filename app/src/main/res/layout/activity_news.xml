@@ -55,6 +55,7 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:contentDescription="Profile Picture"
+            android:scaleType="centerCrop"
             android:src="@drawable/user"
             app:shapeAppearanceOverlay="@style/CircleImageViewStyle"
             app:strokeColor="@color/black"

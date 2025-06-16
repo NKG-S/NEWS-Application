@@ -3,8 +3,10 @@ package com.uoc.fot.ict.edunews;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory; // NEW IMPORT: For BitmapFactory
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,11 +19,14 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.graphics.ImageDecoder;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.OnBackPressedCallback;
+
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -38,6 +43,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream; // NEW IMPORT: For InputStream
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -60,7 +66,7 @@ public class UserInfo extends AppCompatActivity {
     private ImageButton editProfilePictureButton;
     private CircleImageView profilePicture;
     private ProgressBar progressBar;
-    private LinearLayout authorButtonsLayout; // Added LinearLayout for author buttons
+    private LinearLayout authorButtonsLayout;
 
     // Firebase Instances
     private FirebaseAuth mAuth;
@@ -85,6 +91,9 @@ public class UserInfo extends AppCompatActivity {
     // For background processing
     private ExecutorService executorService;
     private Handler handler;
+
+    // OnBackPressedCallback for modern back press handling
+    private OnBackPressedCallback onBackPressedCallback;
 
 
     @Override
@@ -114,12 +123,11 @@ public class UserInfo extends AppCompatActivity {
         mobileInputLayout = findViewById(R.id.mobileInputLayout);
 
         editSaveButton = findViewById(R.id.editSaveButton);
-        // Added myPostsButton
         Button dev_Info = findViewById(R.id.devInfo);
         mainActionButton = findViewById(R.id.mainActionButton);
         Button writeNewPostButton = findViewById(R.id.WriteNewPost);
-        Button myPostsButton = findViewById(R.id.MyPosts); // Initialize the new MyPosts button
-        authorButtonsLayout = findViewById(R.id.authorButtonsLayout); // Initialize the LinearLayout
+        Button myPostsButton = findViewById(R.id.MyPosts);
+        authorButtonsLayout = findViewById(R.id.authorButtonsLayout);
 
         ImageButton backButton = findViewById(R.id.backButton);
         profilePicture = findViewById(R.id.profilePicture);
@@ -133,15 +141,36 @@ public class UserInfo extends AppCompatActivity {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         selectedImageUri = result.getData().getData();
                         if (selectedImageUri != null) {
+                            // Use Glide to immediately display the selected image
                             Glide.with(this).load(selectedImageUri).into(profilePicture);
                             Toast.makeText(this, "Image selected, click 'Save' to upload.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         Toast.makeText(this, "Image selection cancelled.", Toast.LENGTH_SHORT).show();
-                        selectedImageUri = null;
+                        selectedImageUri = null; // Clear selected URI if cancelled
                     }
                 }
         );
+
+        // Initialize and enable OnBackPressedCallback
+        onBackPressedCallback = new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                Log.d(TAG, "Back button pressed, handling via dispatcher.");
+                if (isEditMode) {
+                    Toast.makeText(UserInfo.this, "Discarding changes and exiting edit mode.", Toast.LENGTH_SHORT).show();
+                    isEditMode = false;
+                    displayUserData(false);
+                    selectedImageUri = null;
+                } else {
+                    Intent intent = new Intent(UserInfo.this, home.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
 
         // Fetch user data from Firebase
         fetchUserData();
@@ -161,13 +190,12 @@ public class UserInfo extends AppCompatActivity {
                 isEditMode = false;
                 displayUserData(false);
                 selectedImageUri = null;
-                // updateAuthorButtonVisibility() is called within displayUserData(false)
             } else {
                 signOutUser();
             }
         });
 
-        backButton.setOnClickListener(v -> onBackPressed());
+        backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         editProfilePictureButton.setOnClickListener(v -> {
             if (isEditMode) {
@@ -175,20 +203,17 @@ public class UserInfo extends AppCompatActivity {
             }
         });
 
-        // Set listener for "Write A new post" button
         writeNewPostButton.setOnClickListener(v -> {
             Toast.makeText(UserInfo.this, "Opening new post activity...", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(UserInfo.this, CreatePost.class);
             startActivity(intent);
         });
 
-        // Set listener for the new "My Posts" button
         myPostsButton.setOnClickListener(v -> {
             Toast.makeText(UserInfo.this, "Opening your posts...", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(UserInfo.this, MyPosts.class); // Navigate to MyPosts activity
+            Intent intent = new Intent(UserInfo.this, MyPosts.class);
             startActivity(intent);
         });
-
 
         dev_Info.setOnClickListener(v -> {
             Toast.makeText(UserInfo.this, "Opening Developer Informations...", Toast.LENGTH_SHORT).show();
@@ -216,12 +241,11 @@ public class UserInfo extends AppCompatActivity {
                             currentMobile = document.getString("mobileNumber");
                             currentEmail = currentUser.getEmail();
                             currentProfilePictureUrl = document.getString("profilePictureUrl");
-                            // Retrieve author status
                             Boolean authorStatus = document.getBoolean("author");
-                            isAuthor = (authorStatus != null && authorStatus); // Default to false if not found/null
+                            isAuthor = (authorStatus != null && authorStatus);
 
                             Log.d(TAG, "User data fetched: " + currentUsername + ", isAuthor: " + isAuthor);
-                            displayUserData(false); // Display in view mode initially
+                            displayUserData(false);
                         } else {
                             Log.d(TAG, "User data document does not exist, creating default.");
                             currentEmail = currentUser.getEmail();
@@ -229,34 +253,34 @@ public class UserInfo extends AppCompatActivity {
                             currentAddress = "";
                             currentMobile = "";
                             currentProfilePictureUrl = "";
-                            isAuthor = false; // Default to not author if document doesn't exist
+                            isAuthor = false;
 
                             Map<String, Object> defaultUserData = new HashMap<>();
                             defaultUserData.put("username", currentUsername);
                             defaultUserData.put("email", currentEmail);
                             defaultUserData.put("address", currentAddress);
-                            defaultUserData.put("mobileNumber", currentMobile); // Changed key to mobileNumber to match existing usage
+                            defaultUserData.put("mobileNumber", currentMobile);
                             defaultUserData.put("profilePictureUrl", currentProfilePictureUrl);
-                            defaultUserData.put("author", isAuthor); // Add author field to default data
+                            defaultUserData.put("author", isAuthor);
 
                             db.collection("users").document(userId).set(defaultUserData)
                                     .addOnSuccessListener(aVoid -> Log.d(TAG, "Default user data created in Firestore."))
                                     .addOnFailureListener(e -> Log.e(TAG, "Error creating default user data", e));
 
-                            displayUserData(false); // Display in view mode
+                            displayUserData(false);
                         }
                     } else {
                         Log.e(TAG, "Failed to load user data from Firestore: ", task.getException());
-                        Toast.makeText(UserInfo.this, "Failed to load user data: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                        currentEmail = currentUser.getEmail(); // Still try to get email from FirebaseAuth
-                        displayUserData(false); // Display in view mode even on error
+                        Toast.makeText(UserInfo.this, "Failed to load user data: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                        currentEmail = currentUser.getEmail();
+                        displayUserData(false);
                     }
                 }
             });
         } else {
             Log.d(TAG, "No current user, redirecting to SignIn.");
             Toast.makeText(this, "User not logged in. Please sign in.", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(UserInfo.this, SignIn.class); // Assuming SignIn is your login activity
+            Intent intent = new Intent(UserInfo.this, SignIn.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
@@ -350,7 +374,7 @@ public class UserInfo extends AppCompatActivity {
     private void toggleEditMode() {
         isEditMode = !isEditMode;
         displayUserData(isEditMode);
-        selectedImageUri = null;
+        selectedImageUri = null; // Clear selected image URI when toggling mode
     }
 
     /**
@@ -407,7 +431,29 @@ public class UserInfo extends AppCompatActivity {
             try {
                 // Handle profile picture upload first if a new one is selected
                 if (selectedImageUri != null) {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+                    Bitmap bitmap;
+                    // Check Android version to use appropriate method for getting bitmap
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(getContentResolver(), selectedImageUri));
+                    } else {
+                        // For older Android versions, use a more robust way than deprecated getBitmap
+                        // This involves opening an InputStream and decoding it
+                        InputStream imageStream = getContentResolver().openInputStream(selectedImageUri);
+                        bitmap = BitmapFactory.decodeStream(imageStream);
+                        if (imageStream != null) {
+                            imageStream.close(); // Close the stream
+                        }
+                    }
+
+                    if (bitmap == null) {
+                        handler.post(() -> {
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(UserInfo.this, "Failed to decode image.", Toast.LENGTH_LONG).show();
+                            Log.e(TAG, "Bitmap is null after decoding image URI.");
+                        });
+                        return; // Exit if bitmap is null
+                    }
+
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 75, baos);
                     byte[] data = baos.toByteArray();
@@ -421,14 +467,14 @@ public class UserInfo extends AppCompatActivity {
                             }).addOnFailureListener(e -> {
                                 handler.post(() -> {
                                     progressBar.setVisibility(View.GONE);
-                                    Toast.makeText(UserInfo.this, "Failed to get new profile picture URL: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(UserInfo.this, "Failed to get new profile picture URL: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
                                     Log.e(TAG, "Error getting download URL", e);
                                 });
                             }))
                             .addOnFailureListener(e -> {
                                 handler.post(() -> {
                                     progressBar.setVisibility(View.GONE);
-                                    Toast.makeText(UserInfo.this, "Failed to upload profile picture: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(UserInfo.this, "Failed to upload profile picture: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
                                     Log.e(TAG, "Error uploading profile picture", e);
                                 });
                             });
@@ -440,7 +486,7 @@ public class UserInfo extends AppCompatActivity {
                 Log.e(TAG, "Error processing image for upload", e);
                 handler.post(() -> {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(UserInfo.this, "Error processing image: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(UserInfo.this, "Error processing image: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
                 });
             }
         });
@@ -472,7 +518,7 @@ public class UserInfo extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     handler.post(() -> {
                         progressBar.setVisibility(View.GONE);
-                        Toast.makeText(UserInfo.this, "Error updating profile: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(UserInfo.this, "Error updating profile: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
                         Log.e(TAG, "Error updating document", e);
                     });
                 });

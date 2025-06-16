@@ -21,34 +21,43 @@
         android:id="@+id/bannerTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:background="#80000000"
+        android:layout_gravity="bottom"
+        android:background="@drawable/gradient_banner_overlay"
         android:fontFamily="@font/montserrat_bold"
         android:maxHeight="108dp"
-        android:padding="8dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="32dp"
+        android:paddingBottom="12dp"
         android:text="World Art Day\nA work of art which did not begin in emotion is not art."
         android:textColor="@color/white"
-        android:textSize="18sp" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/articleDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|right"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginVertical="8dp"
+        android:layout_gravity="top|end"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/rounded_transparent_white_background"
         android:fontFamily="@font/montserrat_bold"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp"
         android:text="17 Apr 2025"
         android:textColor="@android:color/white"
         android:textSize="12sp" />
 
     <ImageView
         android:id="@+id/bannerArrow"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="8dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/circle_transparent_black_background"
         android:contentDescription="Go to news"
+        android:padding="6dp"
         android:src="@drawable/ic_arrow_right"
         app:tint="@color/white" />
 

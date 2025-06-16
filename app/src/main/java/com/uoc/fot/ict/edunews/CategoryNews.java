@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback; // NEW IMPORT: For modern back press handling
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -57,7 +58,6 @@ public class CategoryNews extends AppCompatActivity {
         setContentView(R.layout.activity_category_news); // Set the layout for this activity
 
         // Initialize UI components by finding them by their IDs from the layout
-        // UI Components
         TextView categoryNameTitle = findViewById(R.id.categoryNameTitle);
         ImageButton backButton = findViewById(R.id.backButton);
         ImageButton sortButton = findViewById(R.id.sortButton);
@@ -80,13 +80,27 @@ public class CategoryNews extends AppCompatActivity {
         }
 
         // Set up the RecyclerView with its adapter and layout manager
-        // The NewsArticleAdapter is reused to display the news cards
         newsArticleAdapter = new NewsArticleAdapter(new ArrayList<>(), this::navigateToNewsDetail);
         categoryNewsRecyclerView.setLayoutManager(new LinearLayoutManager(this)); // Vertical list layout
         categoryNewsRecyclerView.setAdapter(newsArticleAdapter);
 
+        // NEW: Register OnBackPressedCallback for modern back press handling
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                Log.d("CategoryNewsActivity", "Back button pressed via dispatcher.");
+                // Define the behavior for the back press here.
+                // For example, navigate back to the home screen (or MyPosts if that's the usual entry point)
+                Intent intent = new Intent(CategoryNews.this, home.class); // Assuming 'home.class' is your main feed activity
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Clear back stack
+                startActivity(intent);
+                finish(); // Finish the current activity
+            }
+        });
+
         // Set up click listeners for the back button and sort button
-        backButton.setOnClickListener(v -> onBackPressed()); // Pressing back button finishes this activity
+        // NEW: backButton now triggers the OnBackPressedDispatcher
+        backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
         sortButton.setOnClickListener(this::showSortPopupMenu); // Show sorting options when sort button is clicked
 
         // Fetch news articles from Firestore for the determined category
@@ -101,10 +115,6 @@ public class CategoryNews extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE); // Show progress bar while loading
         emptyStateText.setVisibility(View.GONE); // Hide empty state text
 
-        // Construct a Firestore query:
-        // - Collection "posts"
-        // - Filter by "category" equal to currentCategory
-        // - Order results by "postDate" in descending order (latest first)
         db.collection("posts")
                 .whereEqualTo("category", currentCategory)
                 .orderBy("postDate", Query.Direction.DESCENDING) // Default sort for fetching
@@ -114,28 +124,21 @@ public class CategoryNews extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         articlesList.clear(); // Clear any previously loaded articles
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            // Convert each Firestore document to a NewsArticle object
                             NewsArticle article = document.toObject(NewsArticle.class);
-                            // **** FIX APPLIED HERE ****
-                            // Explicitly set the document ID to the NewsArticle object
-                            // This ensures article.getId() does not return null later.
-                            article.setId(document.getId());
+                            article.setId(document.getId()); // Explicitly set the document ID
                             articlesList.add(article); // Add to the list
                         }
 
                         if (articlesList.isEmpty()) {
                             emptyStateText.setVisibility(View.VISIBLE); // Show empty state if no articles found
                         } else {
-                            // Apply the current sorting order to the fetched list
-                            sortArticles(currentSortOrder);
-                            // Update the RecyclerView adapter with the (sorted) data
-                            newsArticleAdapter.updateData(articlesList);
+                            sortArticles(currentSortOrder); // Apply the current sorting order to the fetched list
+                            newsArticleAdapter.updateData(articlesList); // Update the RecyclerView adapter with the (sorted) data
                             emptyStateText.setVisibility(View.GONE); // Ensure empty state is hidden
                         }
                     } else {
-                        // Log the error and show a toast if fetching fails
-                        Log.e("CategoryNewsActivity", "Error getting documents: ", task.getException());
-                        Toast.makeText(this, "Failed to load articles.", Toast.LENGTH_SHORT).show();
+                        Log.e("CategoryNewsActivity", "Error getting documents: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"));
+                        Toast.makeText(this, "Failed to load articles: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"), Toast.LENGTH_SHORT).show();
                         emptyStateText.setVisibility(View.VISIBLE); // Show empty state on error
                     }
                 });
@@ -148,7 +151,6 @@ public class CategoryNews extends AppCompatActivity {
      */
     private void showSortPopupMenu(View view) {
         PopupMenu popup = new PopupMenu(this, view);
-        // Inflate the menu defined in menu_category_news_sort.xml
         popup.getMenuInflater().inflate(R.menu.menu_category_news_sort, popup.getMenu());
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -176,15 +178,12 @@ public class CategoryNews extends AppCompatActivity {
      * @param order The desired sorting order (LATEST_TO_OLDEST or OLDEST_TO_LATEST).
      */
     private void sortArticles(SortOrder order) {
-        // Define the date format used in your NewsArticle's postDate string
         SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
-        // Sort the articlesList using Collections.sort and a custom Comparator
         Collections.sort(articlesList, new Comparator<NewsArticle>() {
             @Override
             public int compare(NewsArticle a1, NewsArticle a2) {
                 try {
-                    // Parse the postDate strings into Date objects
                     Date date1 = inputFormat.parse(a1.getPostDate());
                     Date date2 = inputFormat.parse(a2.getPostDate());
 
@@ -193,13 +192,11 @@ public class CategoryNews extends AppCompatActivity {
                     if (date1 == null) return (order == SortOrder.LATEST_TO_OLDEST) ? 1 : -1; // Nulls last for L->O, first for O->L
                     if (date2 == null) return (order == SortOrder.LATEST_TO_OLDEST) ? -1 : 1; // Nulls last for L->O, first for O->L
 
-                    // Compare dates based on the chosen sort order
                     return (order == SortOrder.LATEST_TO_OLDEST) ? date2.compareTo(date1) : date1.compareTo(date2);
 
                 } catch (ParseException e) {
-                    // Log parsing errors and treat items as equal if date cannot be parsed
-                    Log.e("CategoryNewsActivity", "Date parsing error: " + e.getMessage());
-                    return 0;
+                    Log.e("CategoryNewsActivity", "Date parsing error for sorting: " + e.getMessage());
+                    return 0; // Treat items as equal if date cannot be parsed for sorting purposes
                 }
             }
         });
@@ -213,9 +210,8 @@ public class CategoryNews extends AppCompatActivity {
      * @param article The NewsArticle object that was clicked.
      */
     private void navigateToNewsDetail(NewsArticle article) {
-        // Corrected Intent: Pass only the article ID to the News activity
-        Intent intent = new Intent(this, news.class); // Ensure 'News' is the correct class name for your detail activity
-        intent.putExtra("NEWS_ARTICLE_ID", article.getId()); // Pass the document ID
+        Intent intent = new Intent(this, news.class);
+        intent.putExtra("NEWS_ARTICLE_ID", article.getId());
         startActivity(intent);
 
         Toast.makeText(this, "Opening article: " + article.getTitle(), Toast.LENGTH_SHORT).show();

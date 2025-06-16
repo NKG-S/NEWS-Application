@@ -11,8 +11,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.SearchView; // Correct import for SearchView
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -60,7 +61,6 @@ public class MyPosts extends AppCompatActivity {
         setContentView(R.layout.activity_my_posts);
 
         // Initialize UI components
-        // UI Components
         TextView myPostsTitle = findViewById(R.id.myPostsTitle);
         ImageButton backButton = findViewById(R.id.backButton);
         ImageButton sortButton = findViewById(R.id.sortButton);
@@ -74,19 +74,30 @@ public class MyPosts extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         // Set up the RecyclerView with its adapter and layout manager
-        // IMPORTANT: Pass article.getId() to navigateToEditPost
         newsArticleAdapter = new NewsArticleAdapter(new ArrayList<>(), article -> navigateToEditPost(article.getId()));
         myPostsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         myPostsRecyclerView.setAdapter(newsArticleAdapter);
 
+        // Register OnBackPressedCallback for modern back press handling
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                Log.d("MyPostsActivity", "Back button pressed via dispatcher.");
+                Intent intent = new Intent(MyPosts.this, home.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
+
         // Set up click listeners for the back button and sort button
-        backButton.setOnClickListener(v -> onBackPressed());
+        backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
         sortButton.setOnClickListener(this::showSortPopupMenu);
 
         // Set up SearchView listener
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public boolean onQueryTextSubmit(String query) { // FIXED: Removed extra "On"
                 filterArticles(query);
                 return true;
             }
@@ -127,10 +138,6 @@ public class MyPosts extends AppCompatActivity {
         emptyStateText.setVisibility(View.GONE);
         myPostsRecyclerView.setVisibility(View.GONE); // Hide RecyclerView during loading
 
-        // Construct a Firestore query:
-        // - Collection "posts"
-        // - Filter by "userId" equal to current user's UID
-        // - Order results by "postDate" in descending order (latest first)
         db.collection("posts")
                 .whereEqualTo("userId", currentUser.getUid())
                 .orderBy("postDate", Query.Direction.DESCENDING)
@@ -158,8 +165,8 @@ public class MyPosts extends AppCompatActivity {
                             filterArticles(searchView.getQuery().toString());
                         }
                     } else {
-                        Log.e("MyPostsActivity", "Error getting documents: ", task.getException());
-                        Toast.makeText(this, "Failed to load your posts.", Toast.LENGTH_SHORT).show();
+                        Log.e("MyPostsActivity", "Error getting documents: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"));
+                        Toast.makeText(this, "Failed to load your posts: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"), Toast.LENGTH_SHORT).show();
                         emptyStateText.setText("Failed to load your posts.");
                         emptyStateText.setVisibility(View.VISIBLE);
                         myPostsRecyclerView.setVisibility(View.GONE);
@@ -222,8 +229,7 @@ public class MyPosts extends AppCompatActivity {
 
                 } catch (ParseException e) {
                     Log.e("MyPostsActivity", "Date parsing error for article: " + a1.getTitle() + " or " + a2.getTitle() + " - " + e.getMessage());
-                    // Fallback: maintain original order or sort by title if dates are unparseable
-                    return 0; // or a1.getTitle().compareTo(a2.getTitle());
+                    return 0; // Fallback: treat as equal if date cannot be parsed
                 }
             }
         });
@@ -241,7 +247,6 @@ public class MyPosts extends AppCompatActivity {
         } else {
             String lowerCaseQuery = query.toLowerCase(Locale.getDefault());
             for (NewsArticle article : articlesList) {
-                // Ensure title is not null before converting to lowercase
                 if (article.getTitle() != null && article.getTitle().toLowerCase(Locale.getDefault()).contains(lowerCaseQuery)) {
                     filteredArticlesList.add(article);
                 }
@@ -272,7 +277,7 @@ public class MyPosts extends AppCompatActivity {
      */
     private void navigateToEditPost(String postId) {
         Intent intent = new Intent(this, EditPost.class);
-        intent.putExtra("postId", postId); // Pass only the postId
+        intent.putExtra("postId", postId);
         startActivity(intent);
 
         Toast.makeText(this, "Opening post for editing.", Toast.LENGTH_SHORT).show();

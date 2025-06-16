@@ -1,10 +1,11 @@
 package com.uoc.fot.ict.edunews;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.graphics.Bitmap; // Keep for potential future use if needed, but not directly used by getBitmap
 import android.net.Uri;
+import android.os.Build; // NEW IMPORT: For ImageDecoder
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.provider.MediaStore; // Keep for potential future use, but getBitmap is deprecated
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -15,10 +16,17 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.graphics.ImageDecoder; // NEW IMPORT: For ImageDecoder (API 28+)
 
+
+import androidx.activity.result.ActivityResultLauncher; // NEW IMPORT
+import androidx.activity.result.contract.ActivityResultContracts; // NEW IMPORT
+import androidx.annotation.NonNull; // Keep for NonNull annotations
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.OnBackPressedCallback; // NEW IMPORT
+
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -26,8 +34,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserInfo;
+// import com.google.firebase.auth.UserInfo; // Removed: This is Firebase's UserInfo interface, not your activity
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -44,7 +53,7 @@ import java.util.UUID;
 
 public class EditPost extends AppCompatActivity {
 
-    private static final int PICK_IMAGE_REQUEST = 1;
+    // private static final int PICK_IMAGE_REQUEST = 1; // DEPRECATED: No longer needed with Activity Result API
     private static final String TAG = "EditPost";
 
     // UI Elements
@@ -69,6 +78,10 @@ public class EditPost extends AppCompatActivity {
     private String originalImageUrl; // To store the URL of the image fetched from Firestore
     private boolean isEditMode = false; // To track current mode
 
+    // NEW: Activity Result Launcher for image picking
+    private ActivityResultLauncher<Intent> pickImageLauncher;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +90,54 @@ public class EditPost extends AppCompatActivity {
         initializeFirebase();
         initializeViews();
         setupCategoryDropdown(); // Setup dropdown *before* listeners so adapter is ready
+
+        // NEW: Initialize Activity Result Launcher
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        imageUri = result.getData().getData(); // Get the URI of the selected image
+                        if (imageUri != null) {
+                            // NEW: Use Glide to load the image into the ImageView directly from the URI
+                            Glide.with(this)
+                                    .load(imageUri)
+                                    .placeholder(R.drawable.rounded_transparent_white_background) // Placeholder while loading
+                                    .error(R.drawable.rounded_transparent_white_background) // Image to show if loading fails
+                                    .into(postImagePreview);
+                            updateImageButtonsVisibility();
+                        }
+                    } else {
+                        Toast.makeText(this, "Image selection cancelled.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        // NEW: Register OnBackPressedCallback for modern back press handling
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                Log.d(TAG, "Back button pressed, handling via dispatcher.");
+                // Custom logic for onBackPressed: If in edit mode, ask to discard changes
+                if (isEditMode) {
+                    new AlertDialog.Builder(EditPost.this)
+                            .setTitle("Discard Changes?")
+                            .setMessage("You have unsaved changes. Do you want to discard them and exit edit mode?")
+                            .setPositiveButton("Discard", (dialog, which) -> {
+                                isEditMode = false;
+                                loadPostData(postId); // Reload original data to revert
+                                toggleEditMode(false); // Switch to view mode
+                                Toast.makeText(EditPost.this, "Changes discarded.", Toast.LENGTH_SHORT).show();
+                            })
+                            .setNegativeButton("Cancel", null) // Do nothing on cancel
+                            .show();
+                } else {
+                    // If not in edit mode, simply navigate back to MyPosts
+                    navigateToMyPosts();
+                }
+            }
+        });
+
+
         setupListeners(); // Now setup listeners
 
         // Get post ID from intent
@@ -126,7 +187,8 @@ public class EditPost extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        backButton.setOnClickListener(v -> navigateToBack());
+        // NEW: backButton now triggers the OnBackPressedDispatcher
+        backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
         // Handle profile icon click if it exists in your XML
         if (profileIcon != null) {
             profileIcon.setOnClickListener(v -> navigateToUserProfile());
@@ -151,21 +213,20 @@ public class EditPost extends AppCompatActivity {
         });
     }
 
-    private void navigateToBack() {
-        startActivity(new Intent(this, MyPosts.class));
-        finish();
-    }
-
     private void navigateToUserProfile() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // Replace UserInfo.class with your actual user profile activity
-            Intent intent = new Intent(this, UserInfo.class); // Assuming UserInfo.class is your user profile activity
+            Intent intent = new Intent(this, UserInfo.class); // Full path to your UserInfo activity
             intent.putExtra("userId", currentUser.getUid());
             startActivity(intent);
         } else {
             Toast.makeText(this, "Please log in to view profile.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void navigateToMyPosts() {
+        startActivity(new Intent(this, MyPosts.class));
+        finish();
     }
 
     private void setupCategoryDropdown() {
@@ -181,43 +242,35 @@ public class EditPost extends AppCompatActivity {
                 categories
         );
         categoryInput.setAdapter(adapter);
-        // Important: Set a threshold for when the dropdown automatically appears.
-        // A value of 1 means it will show immediately when typed into or clicked.
         categoryInput.setThreshold(1);
-
-        // This listener ensures that if a selection is made, it updates the text and keeps the dropdown dismissed.
-        categoryInput.setOnItemClickListener((parent, view, position, id) -> {
-            // Optional: You can do something here if an item is clicked,
-            // like setting a flag that a category was selected.
-            // For now, just setting the text is handled automatically by AutoCompleteTextView
-            // and the dropdown will dismiss itself.
-        });
     }
 
     private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
-        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST);
+        // NEW: Use the ActivityResultLauncher instead of deprecated startActivityForResult
+        pickImageLauncher.launch(Intent.createChooser(intent, "Select Image"));
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-            imageUri = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-                postImagePreview.setImageBitmap(bitmap);
-                updateImageButtonsVisibility();
-            } catch (IOException e) {
-                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
+    // REMOVED: onActivityResult is deprecated and its functionality is now handled by pickImageLauncher
+    // @Override
+    // protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    //     super.onActivityResult(requestCode, resultCode, data);
+    //     if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+    //         imageUri = data.getData();
+    //         try {
+    //             Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+    //             postImagePreview.setImageBitmap(bitmap);
+    //             updateImageButtonsVisibility();
+    //         } catch (IOException e) {
+    //             Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+    //         }
+    //     }
+    // }
 
     private void clearSelectedImage() {
         imageUri = null;
-        postImagePreview.setImageResource(R.drawable.add_icon); // Set to default add icon
+        postImagePreview.setImageResource(R.drawable.rounded_transparent_white_background); // Set to default rounded_transparent_white_background
         updateImageButtonsVisibility();
     }
 
@@ -228,6 +281,10 @@ public class EditPost extends AppCompatActivity {
         clearImageButton.setVisibility(isEditMode && imageUri != null ? View.VISIBLE : View.GONE);
         // postImagePreview should always be visible to show either the image or the add_icon
         postImagePreview.setVisibility(View.VISIBLE);
+        // Ensure placeholder is set if no image and it's visible
+        if (imageUri == null) {
+            postImagePreview.setImageResource(R.drawable.rounded_transparent_white_background);
+        }
     }
 
     /**
@@ -247,13 +304,10 @@ public class EditPost extends AppCompatActivity {
         categoryInput.setFocusable(isEditMode);
         categoryInput.setFocusableInTouchMode(isEditMode);
 
-        // NEW: Control the end icon of the TextInputLayout for the category dropdown
+        // Control the end icon of the TextInputLayout for the category dropdown
         if (isEditMode) {
-            // When in edit mode, show the dropdown icon
             categoryInputLayout.setEndIconMode(TextInputLayout.END_ICON_DROPDOWN_MENU);
-            // We no longer automatically show the dropdown here; it relies on user click/focus.
         } else {
-            // When in view mode, hide the dropdown icon
             categoryInputLayout.setEndIconMode(TextInputLayout.END_ICON_NONE);
             categoryInput.dismissDropDown(); // Hide dropdown if exiting edit mode
             categoryInput.clearFocus(); // Ensure it loses focus properly when switching to view mode
@@ -283,6 +337,7 @@ public class EditPost extends AppCompatActivity {
         }
     }
 
+
     private void loadPostData(String postId) {
         progressBar.setVisibility(View.VISIBLE);
         db.collection("posts").document(postId).get()
@@ -303,7 +358,7 @@ public class EditPost extends AppCompatActivity {
                                     .into(postImagePreview);
                         } else {
                             imageUri = null; // No image for this post
-                            postImagePreview.setImageResource(R.drawable.add_icon);
+                            postImagePreview.setImageResource(R.drawable.rounded_transparent_white_background);
                         }
                         updateImageButtonsVisibility(); // Update visibility based on loaded image
                     } else {
@@ -313,8 +368,8 @@ public class EditPost extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
-                    Log.e(TAG, "Error loading post: " + e.getMessage());
-                    Toast.makeText(this, "Error loading post: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Error loading post: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"));
+                    Toast.makeText(this, "Error loading post: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
                     finish();
                 });
     }
@@ -371,7 +426,7 @@ public class EditPost extends AppCompatActivity {
                 Log.d(TAG, "Old image deleted successfully before new upload.");
                 performImageUploadAndFirestoreUpdate(title, category, description);
             }).addOnFailureListener(e -> {
-                Log.e(TAG, "Failed to delete old image before new upload: " + e.getMessage());
+                Log.e(TAG, "Failed to delete old image before new upload: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"));
                 // Continue with new upload even if old one fails to delete
                 performImageUploadAndFirestoreUpdate(title, category, description);
             });
@@ -390,7 +445,7 @@ public class EditPost extends AppCompatActivity {
                     Log.d(TAG, "Old image deleted successfully after clear action.");
                     savePostToFirestore(title, category, description, newImageUrl);
                 }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to delete old image after clear action: " + e.getMessage());
+                    Log.e(TAG, "Failed to delete old image after clear action: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"));
                     // Continue to update Firestore even if deletion fails
                     Toast.makeText(this, "Failed to delete old image, but post data will be updated.", Toast.LENGTH_SHORT).show();
                     savePostToFirestore(title, category, description, newImageUrl);
@@ -459,8 +514,8 @@ public class EditPost extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
         submitButton.setEnabled(true);
         deleteButton.setEnabled(true);
-        Toast.makeText(this, "Error updating post: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        Log.e(TAG, "Error updating post: " + e.getMessage());
+        Toast.makeText(this, "Error updating post: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+        Log.e(TAG, "Error updating post: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"));
     }
 
     private void confirmDeletePost() {
@@ -490,13 +545,13 @@ public class EditPost extends AppCompatActivity {
                     Log.d(TAG, "Image deleted from storage successfully.");
                     deletePostDocumentFromFirestore();
                 }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to delete image from storage: " + e.getMessage());
+                    Log.e(TAG, "Failed to delete image from storage: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"));
                     // Even if image deletion fails, try to delete the Firestore document
                     Toast.makeText(this, "Failed to delete image, but deleting post data...", Toast.LENGTH_SHORT).show();
                     deletePostDocumentFromFirestore();
                 });
             } catch (IllegalArgumentException e) {
-                // originalImageUrl is not a valid Firebase Storage URL, proceed to delete document
+                // originalImageUrl is not a valid Firebase Storage URL. Proceed with Firestore document deletion.
                 Log.w(TAG, "Original image URL is not a valid Firebase Storage URL. Proceeding with Firestore document deletion.");
                 deletePostDocumentFromFirestore();
             }
@@ -510,14 +565,14 @@ public class EditPost extends AppCompatActivity {
                 .addOnSuccessListener(aVoid -> {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(this, "Post deleted successfully!", Toast.LENGTH_SHORT).show();
-                    navigateToBack(); // Go back to home after deletion
+                    navigateToMyPosts(); // Go back to MyPosts after deletion
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
                     submitButton.setEnabled(true);
                     deleteButton.setEnabled(true);
-                    Toast.makeText(this, "Error deleting post: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "Error deleting post document: " + e.getMessage());
+                    Toast.makeText(this, "Error deleting post: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Error deleting post document: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"));
                 });
     }
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/colorControlHighlight"> <item>
+    <shape android:shape="rectangle">
+        <corners android:radius="12dp" /> <gradient
+        android:angle="0"
+        android:startColor="@color/ButtonColour"
+        android:endColor="#89C4F4" android:type="linear" />
+        <padding android:left="16dp" android:right="16dp" android:top="8dp" android:bottom="8dp"/>
+    </shape>
+</item>
+</ripple>

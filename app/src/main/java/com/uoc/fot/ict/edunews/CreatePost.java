@@ -178,7 +178,7 @@ public class CreatePost extends AppCompatActivity {
 
     private void clearSelectedImage() {
         imageUri = null;
-        postImagePreview.setImageResource(R.drawable.add_icon);
+        postImagePreview.setImageResource(R.drawable.rounded_transparent_white_background);
         updateImageButtonsVisibility();
     }
 
