@@ -34,7 +34,7 @@
                     android:id="@+id/topBar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:layout_marginTop="48dp"
+                    android:layout_marginTop="36dp"
                     android:background="@color/white"
                     android:elevation="4dp"
                     android:paddingStart="24dp"
@@ -65,7 +65,7 @@
                         android:scaleType="centerCrop"
                         android:src="@drawable/user"
                         app:shapeAppearanceOverlay="@style/CircleImageViewStyle"
-                        app:strokeColor="@color/black"
+                        app:strokeColor="@color/light_grey"
                         android:padding="1dp"
                         app:strokeWidth="2dp" />
 
@@ -75,8 +75,8 @@
                     android:id="@+id/newUpdatesLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="12dp"
                     android:fontFamily="@font/montserrat_bold"
                     android:text="NEW UPDATES"
                     android:textColor="@color/black"
@@ -109,12 +109,12 @@
                     android:id="@+id/categoriesLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="12dp"
                     android:fontFamily="@font/montserrat_bold"
                     android:text="Categories"
                     android:textColor="@color/black"
-                    android:textSize="22sp" />
+                    android:textSize="24sp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/categoriesRecyclerView"
@@ -123,8 +123,8 @@
                     android:layout_marginTop="16dp"
                     android:clipToPadding="false"
                     android:orientation="horizontal"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:itemCount="5"
                     tools:listitem="@layout/item_category" />
@@ -133,12 +133,12 @@
                     android:id="@+id/olderNewsLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="12dp"
                     android:fontFamily="@font/montserrat_bold"
                     android:text="Older News"
                     android:textColor="@color/black"
-                    android:textSize="22sp" />
+                    android:textSize="24sp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/olderNewsRecyclerView"
@@ -147,7 +147,7 @@
                     android:layout_marginTop="16dp"
                     android:clipToPadding="false"
                     android:nestedScrollingEnabled="false"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="12dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:itemCount="25"
                     tools:listitem="@layout/item_news_article" />

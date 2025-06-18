@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="post_categories">
+        <item>Education</item>
+        <item>Sports</item>
+        <item>Science</item>
+        <item>Technology</item>
+        <item>Art &amp; Culture</item>
+        <item>International</item>
+        <item>Health</item>
+        <item>Political</item>
+        <item>Business</item>
+        <item>Editorials</item>
+        <item>Social</item>
+        <item>Crime</item>
+        <item>Environment</item>
+        <item>Lifestyle</item>
+        <item>Travel</item>
+    </string-array>
+</resources>

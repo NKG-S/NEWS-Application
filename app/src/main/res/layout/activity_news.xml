@@ -9,7 +9,6 @@
     tools:ignore="HardcodedText"
     tools:context=".news">
 
-    <!-- Top Bar Layout -->
     <RelativeLayout
         android:id="@+id/topBar"
         android:layout_width="0dp"
@@ -22,7 +21,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Back Button -->
         <ImageButton
             android:id="@+id/backButton"
             android:layout_width="wrap_content"
@@ -34,7 +32,6 @@
             android:src="@drawable/back"
             app:tint="@color/black" />
 
-        <!-- Title in Top Bar (will be set to news article title) -->
         <TextView
             android:id="@+id/postTitle"
             android:layout_width="wrap_content"
@@ -46,9 +43,8 @@
             android:textColor="@color/black"
             android:gravity="center"
             android:textSize="20sp"
-            tools:text="World Art Day" /> <!-- tools:text for design preview -->
+            tools:text="World Art Day" />
 
-        <!-- Profile Icon in Top Bar -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/profileIcon"
             android:layout_width="45dp"
@@ -64,8 +60,8 @@
 
     </RelativeLayout>
 
-    <!-- Scrollable Content Area for News Article -->
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -74,100 +70,112 @@
         app:layout_constraintTop_toBottomOf="@+id/topBar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/contentRootLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:paddingBottom="16dp">
 
-            <!-- News Article Title -->
-            <TextView
-                android:id="@+id/newsArticleTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/montserrat_bold"
-                android:textColor="@color/black"
-                android:textSize="24sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="World Art Day" />
-
-            <!-- News Article Date and Time -->
-            <TextView
-                android:id="@+id/newsArticleDateTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/montserrat_medium"
-                android:textColor="@color/grey"
-                android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/newsArticleTitle"
-                tools:text="12:44 PM | 2025.06.14" />
-
-            <!-- Edited Status Text - Positioned below DateTime -->
-            <TextView
-                android:id="@+id/edited"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginTop="4dp"
-                android:fontFamily="@font/montserrat_medium"
-                android:textColor="@color/grey"
-                android:textSize="10sp"
-                android:visibility="gone"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/newsArticleDateTime"
-                tools:text="Edited: 2025.06.15 | 03:00 PM" />
-
-
-            <!-- News Article Author - Now correctly constrained below 'edited' -->
-            <TextView
-                android:id="@+id/newsArticleAuthor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:fontFamily="@font/montserrat_semibold"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/edited"
-                tools:text="By: Nethmin" />
-
-            <!-- News Article Image - Adjusted for aspect ratio -->
             <ImageView
                 android:id="@+id/newsArticleImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
-                android:background="@drawable/circular_background_grey"
                 android:contentDescription="News Article Image"
+                android:background="@drawable/circular_background_grey"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/newsArticleAuthor"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:src="@drawable/renew" />
 
-            <!-- News Article Description -->
-            <TextView
-                android:id="@+id/newsArticleDescription"
-                android:layout_width="match_parent"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/contentCard"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/montserrat"
-                android:lineSpacingExtra="4dp"
-                android:textColor="@color/black"
-                android:textSize="16sp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="-40dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/newsArticleImage"
-                tools:text="Sample news article description. This is a longer description to demonstrate how the text wraps and displays within the allocated space below the image. The content should be easily readable for users." />
+                app:layout_constraintTop_toBottomOf="@+id/newsArticleImage">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/light_grey"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <TextView
+                        android:id="@+id/newsArticleTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:textColor="@color/black"
+                        android:textSize="22sp"
+                        android:lineSpacingExtra="2dp"
+                        tools:text="Sample Topic: The Future of AI in Education and Beyond" />
+
+                    <TextView
+                        android:id="@+id/newsArticleDateTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="@font/montserrat_medium"
+                        android:textColor="@color/grey"
+                        android:textSize="10sp"
+                        tools:text="12:44 PM | 2025.06.14" />
+
+                    <TextView
+                        android:id="@+id/edited"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat_medium"
+                        android:textColor="@color/grey"
+                        android:textSize="8sp"
+                        android:visibility="gone"
+                        tools:text="Edited: 2025.06.15 | 03:00 PM" />
+
+                    <TextView
+                        android:id="@+id/newsArticleAuthor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:fontFamily="@font/montserrat_semibold"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        tools:text="By: Nethmin" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@color/light_grey" />
+
+                    <TextView
+                        android:id="@+id/newsArticleDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat"
+                        android:lineSpacingExtra="4dp"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textIsSelectable="true"
+                        android:autoLink="web"
+                        android:textColorLink="@color/Link_blue_colour"
+                        tools:text="Sample news article description. This is a longer description to demonstrate how the text wraps and displays within the allocated space below the image. The content should be easily readable for users. For more info visit example.com or news.org/article-123. This text is now copyable and links will be highlighted and clickable." />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </ScrollView>
 
-    <!-- ProgressBar for loading indication -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
